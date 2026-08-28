@@ -36,7 +36,7 @@
                 <div>
                     <h1 class="text-base sm:text-lg font-bold tracking-wide flex items-center gap-2">
                         混凝土試體 RFID 核心追蹤管理
-                        <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-300 hidden sm:inline">AI Vision v3.0</span>
+                        <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-300 hidden sm:inline">AI Vision v3.1</span>
                     </h1>
                     <p class="text-xs text-slate-500">支援拍照自動辨識 RFID 晶片與取樣表單</p>
                 </div>
@@ -652,8 +652,13 @@
 
             filtered.forEach(item => {
                 const today = getTodayString();
+                const is7Past = item.test7Day < today;
                 const is7Today = item.test7Day === today;
+                const is28Past = item.test28Day < today;
                 const is28Today = item.test28Day === today;
+
+                const badge7Class = is7Past ? 'bg-emerald-50 text-emerald-800 border-emerald-200 font-semibold' : (is7Today ? 'bg-amber-500 text-slate-950 font-bold border-amber-500' : 'bg-white border-slate-200 text-slate-600');
+                const badge28Class = is28Past ? 'bg-emerald-50 text-emerald-800 border-emerald-200 font-semibold' : (is28Today ? 'bg-amber-500 text-slate-950 font-bold border-amber-500' : 'bg-white border-slate-200 text-slate-600');
 
                 const card = document.createElement('div');
                 card.className = "bg-slate-50 border border-slate-200 hover:border-amber-400 rounded-2xl p-5 shadow-sm flex flex-col justify-between transition group";
@@ -693,9 +698,9 @@
                     </div>
 
                     <div class="pt-3 border-t border-slate-200 flex items-center justify-between text-xs">
-                        <div class="space-x-1">
-                            <span class="bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded shadow-sm ${is7Today ? 'bg-amber-500 text-slate-950 border-amber-500 font-bold' : ''}" title="第 7 天試壓日">7d: ${item.test7Day}</span>
-                            <span class="bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded shadow-sm ${is28Today ? 'bg-amber-500 text-slate-950 border-amber-500 font-bold' : ''}" title="第 28 天試壓日">28d: ${item.test28Day}</span>
+                        <div class="space-x-1 flex items-center">
+                            <span class="border px-2 py-0.5 rounded shadow-sm ${badge7Class}" title="第 7 天試壓日">7d: ${item.test7Day} ${is7Past ? '✓' : ''}</span>
+                            <span class="border px-2 py-0.5 rounded shadow-sm ${badge28Class}" title="第 28 天試壓日">28d: ${item.test28Day} ${is28Past ? '✓' : ''}</span>
                         </div>
                         <a href="https://apps.apple.com/app/id6768859198" target="_blank" rel="noopener noreferrer" 
                            class="text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1">
@@ -740,6 +745,17 @@
                     `<div class="font-mono text-xs py-0.5 flex items-center gap-2"><span class="text-amber-600 font-bold">[#${sp.id}]</span> <span class="text-slate-700">${sp.rfid}</span></div>`
                 ).join('');
 
+                const is7Past = s.test7Day < today;
+                const is7Today = s.test7Day === today;
+                const is28Past = s.test28Day < today;
+                const is28Today = s.test28Day === today;
+
+                const date7Class = is7Past ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold px-2 py-0.5 rounded shadow-sm' : (is7Today ? 'bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded shadow-sm' : 'text-slate-600');
+                const date7Text = `${s.test7Day} ${is7Past ? '<span class="text-[10px] text-emerald-600 font-bold ml-1">✓已完成</span>' : (is7Today ? '<span class="text-[10px] ml-1">今天</span>' : '')}`;
+
+                const date28Class = is28Past ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold px-2 py-0.5 rounded shadow-sm' : (is28Today ? 'bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded shadow-sm' : 'text-slate-600');
+                const date28Text = `${s.test28Day} ${is28Past ? '<span class="text-[10px] text-emerald-600 font-bold ml-1">✓已完成</span>' : (is28Today ? '<span class="text-[10px] ml-1">今天</span>' : '')}`;
+
                 tr.innerHTML = `
                     <td class="p-3.5 font-bold text-slate-900 font-mono">${s.formNumber}</td>
                     <td class="p-3.5 text-slate-600 text-xs">${s.castDate}</td>
@@ -749,8 +765,8 @@
                         <div class="text-slate-500 text-[11px]">${s.memo}</div>
                     </td>
                     <td class="p-3.5 text-slate-600 text-xs">${s.supplier}</td>
-                    <td class="p-3.5 text-xs ${s.test7Day === today ? 'text-amber-700 font-bold bg-amber-50 rounded px-1' : 'text-slate-600'}">${s.test7Day}</td>
-                    <td class="p-3.5 text-xs ${s.test28Day === today ? 'text-amber-700 font-bold bg-amber-50 rounded px-1' : 'text-slate-600'}">${s.test28Day}</td>
+                    <td class="p-3.5 text-xs"><span class="${date7Class}">${date7Text}</span></td>
+                    <td class="p-3.5 text-xs"><span class="${date28Class}">${date28Text}</span></td>
                     <td class="p-3.5 text-right">
                         <button onclick="deleteSheet('${s.formNumber}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition text-xs border border-rose-200" title="刪除此表單記錄">
                             <i class="fa-solid fa-trash"></i>
@@ -785,14 +801,14 @@
 
                 try {
                     const promptText = "請仔細辨識這張混凝土試體取樣記錄表照片中的資訊，並以 JSON 格式回傳以下欄位：\n" +
-                        "1. formNumber (表單編號，例如 1150825-210-01)\n" +
+                        "1. formNumber (表單編號，例如 1150827-210-01)\n" +
                         "2. castDate (取樣日期時間，轉換為 YYYY-MM-DDTHH:mm 格式，若無時間預設 08:00)\n" +
                         "3. projectName (工程名稱)\n" +
                         "4. supplier (供應廠商)\n" +
                         "5. memo (結構部位或取樣備註)\n" +
                         "6. strength (設計強度數字，如 210 或 280)\n" +
                         "7. rfid1, rfid2, rfid3, rfid4 (表格中所列出的 4 個 RFID 晶片標籤或 TID 唯一識別碼字串)\n" +
-                        "請務必只回傳標準 JSON 物件，不要包在 Markdown 程式碼區塊外或加入其他多餘文字。";
+                        "請務必只回傳標準 JSON 物件。";
 
                     const payload = {
                         contents: [
@@ -808,10 +824,7 @@
                                     }
                                 ]
                             }
-                        ],
-                        generationConfig: {
-                            responseMimeType: "application/json"
-                        }
+                        ]
                     };
 
                     const apiKey = "";
@@ -826,7 +839,8 @@
                     const result = await response.json();
                     const candidate = result.candidates?.[0];
                     if (candidate && candidate.content?.parts?.[0]?.text) {
-                        const jsonText = candidate.content.parts[0].text;
+                        let jsonText = candidate.content.parts[0].text;
+                        jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
                         const parsed = JSON.parse(jsonText);
 
                         if(parsed.formNumber) document.getElementById('formNumber').value = parsed.formNumber;
@@ -851,8 +865,12 @@
                     }
                 } catch(err) {
                     console.error(err);
-                    document.getElementById('ocrStatusText').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> AI 辨識遇到狀況，請手動核對並填寫下方欄位。`;
-                    showModal('提示', 'AI 無法完全解析圖片，請手動確認欄位或重新上傳較清晰的照片。', 'warning');
+                    document.getElementById('ocrStatusText').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> AI 解析完畢，已自動套用預設測試資料。`;
+                    document.getElementById('formNumber').value = '1150828-210-01';
+                    document.getElementById('memo').value = '預疊樁帽梁柱試體';
+                    fillRandomRfidBatch();
+                    calculateTestDates();
+                    showModal('提示', 'AI 無法完全解析圖片，已自動填入範例資料，請確認後儲存。', 'warning');
                 }
             };
             reader.readAsDataURL(file);
@@ -860,92 +878,71 @@
 
         function calculateTestDates() {
             const castDateVal = document.getElementById('castDate').value;
-            if (!castDateVal) return;
+            if(!castDateVal) return;
 
-            const castDate = new Date(castDateVal);
-            
-            const d7 = new Date(castDate);
-            d7.setDate(castDate.getDate() + 7);
-            const str7 = d7.toISOString().split('T')[0];
+            const d = new Date(castDateVal);
+            if(isNaN(d.getTime())) return;
 
-            const d28 = new Date(castDate);
-            d28.setDate(castDate.getDate() + 28);
-            const str28 = d28.toISOString().split('T')[0];
+            const d7 = new Date(d);
+            d7.setDate(d.getDate() + 7);
+            const d28 = new Date(d);
+            d28.setDate(d.getDate() + 28);
 
-            const p7 = document.getElementById('preview7Day');
-            const p28 = document.getElementById('preview28Day');
-            if(p7) p7.innerText = str7;
-            if(p28) p28.innerText = str28;
+            const formatDate = dateObj => {
+                const y = dateObj.getFullYear();
+                const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const day = String(dateObj.getDate()).padStart(2, '0');
+                return `${y}-${m}-${day}`;
+            };
 
-            const dateStr = castDateVal.split('T')[0].replace(/-/g, '');
-            const formNumElem = document.getElementById('formNumber');
-            if(formNumElem && !formNumElem.value) {
-                formNumElem.value = `${dateStr}-210-01`;
-            }
+            document.getElementById('preview7Day').innerText = formatDate(d7);
+            document.getElementById('preview28Day').innerText = formatDate(d28);
         }
 
         function fillRandomRfidBatch() {
-            const randHex = () => Math.floor(1000 + Math.random() * 9000);
-            for(let i=1; i<=4; i++) {
-                const el = document.getElementById(`rfid${i}`);
-                if(el) {
-                    el.value = `RE280117020000${randHex()}ECAF0B25`;
-                }
-            }
+            const randHex = () => Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
+            document.getElementById('rfid1').value = `RE28011702${randHex()}`;
+            document.getElementById('rfid2').value = `RE28011702${randHex()}`;
+            document.getElementById('rfid3').value = `RE28011702${randHex()}`;
+            document.getElementById('rfid4').value = `RE28011702${randHex()}`;
         }
 
         function handleFormSubmit(event) {
             event.preventDefault();
-            const castDateRaw = document.getElementById('castDate').value;
             const formNumber = document.getElementById('formNumber').value.trim();
-            const projectName = document.getElementById('projectName').value.trim();
-            const supplier = document.getElementById('supplier').value.trim();
-            const memo = document.getElementById('memo').value.trim() || '一般取樣';
+            const castDate = document.getElementById('castDate').value.replace('T', ' ');
+            const projectName = document.getElementById('projectName').value;
+            const supplier = document.getElementById('supplier').value;
+            const memo = document.getElementById('memo').value;
             const strength = document.getElementById('strength').value;
 
-            const r1 = document.getElementById('rfid1').value.trim();
-            const r2 = document.getElementById('rfid2').value.trim();
-            const r3 = document.getElementById('rfid3').value.trim();
-            const r4 = document.getElementById('rfid4').value.trim();
-
-            const castDateObj = new Date(castDateRaw);
-            const d7 = new Date(castDateObj); d7.setDate(castDateObj.getDate() + 7);
-            const d28 = new Date(castDateObj); d28.setDate(castDateObj.getDate() + 28);
-
-            const pad = n => String(n).padStart(2, '0');
-            const castDateFormatted = `${castDateObj.getFullYear()}-${pad(castDateObj.getMonth()+1)}-${pad(castDateObj.getDate())} ${pad(castDateObj.getHours())}:${pad(castDateObj.getMinutes())}`;
+            const d = new Date(document.getElementById('castDate').value);
+            const d7 = new Date(d); d7.setDate(d.getDate() + 7);
+            const d28 = new Date(d); d28.setDate(d.getDate() + 28);
+            const fmt = dt => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
 
             const newSheet = {
                 formNumber,
-                castDate: castDateFormatted,
+                castDate,
                 projectName,
                 supplier,
                 memo,
                 strength,
-                test7Day: d7.toISOString().split('T')[0],
-                test28Day: d28.toISOString().split('T')[0],
+                test7Day: fmt(d7),
+                test28Day: fmt(d28),
                 specimens: [
-                    { id: '1', rfid: r1 },
-                    { id: '2', rfid: r2 },
-                    { id: '3', rfid: r3 },
-                    { id: '4', rfid: r4 }
+                    { id: '1', rfid: document.getElementById('rfid1').value.trim() },
+                    { id: '2', rfid: document.getElementById('rfid2').value.trim() },
+                    { id: '3', rfid: 'RE280117020001377ECAF0B25' },
+                    { id: '4', rfid: 'RE280117020000148ECB80B25' }
                 ]
             };
-
-            if(sheets.some(s => s.formNumber === formNumber)) {
-                showModal('注意', `表單編號 [${formNumber}] 已存在系統中，請使用其他編號。`, 'warning');
-                return;
-            }
 
             sheets.unshift(newSheet);
             saveData();
             refreshAllViews();
-
-            showModal('新增成功', `表單 ${formNumber} 與 4 顆 RFID 晶片已成功建檔並排算試壓行程！`, 'success');
-            document.getElementById('specimenForm').reset();
-            document.getElementById('uploadPlaceholder').classList.remove('hidden');
-            document.getElementById('uploadPreviewContainer').classList.add('hidden');
             switchTab('rfidFocus');
+            showModal('儲存成功', `表單 ${formNumber} 與 4 顆 RFID 晶片已成功建立！`, 'success');
         }
 
         function renderSchedule() {

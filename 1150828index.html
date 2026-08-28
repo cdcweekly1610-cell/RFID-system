@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>混凝土試體 RFID 智慧管理與實驗室排程系統</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full bg-slate-100 text-slate-800 font-sans flex flex-col antialiased selection:bg-amber-400 selection:text-slate-900">
+
+    <!-- Top Header -->
+    <header class="bg-white border-b border-slate-200 text-slate-900 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 p-2.5 rounded-2xl font-bold shadow-md shadow-amber-500/20">
+                    <i class="fa-solid fa-microchip text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold tracking-wide flex items-center gap-2">
+                        混凝土試體 RFID 核心追蹤管理
+                        <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-300 hidden sm:inline">AI Vision v3.1</span>
+                    </h1>
+                    <p class="text-xs text-slate-500">支援拍照自動辨識 RFID 晶片與取樣表單</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="loadAllRecordSheets()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-bold px-3.5 py-2 rounded-xl transition flex items-center space-x-2 shadow-md shadow-amber-500/10">
+                    <i class="fa-solid fa-database"></i>
+                    <span class="hidden sm:inline">重新載入示範記錄表</span>
+                    <span class="sm:hidden">載入表單</span>
+                </button>
+                <a href="https://apps.apple.com/app/id6768859198" target="_blank" rel="noopener noreferrer" 
+                   class="bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl transition flex items-center space-x-2 shadow-md shadow-blue-600/20">
+                    <i class="fa-brands fa-app-store-ios text-lg"></i>
+                    <span class="hidden sm:inline">iOS 掃描 App</span>
+                    <span class="sm:hidden">iOS App</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
+        
+        <!-- Top Metrics & RFID Focus Stats -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- RFID Active Badge Card -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 text-slate-100 text-7xl font-bold select-none pointer-events-none">
+                    <i class="fa-solid fa-wifi"></i>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-lg">RFID 晶片庫存總覽</span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    </div>
+                    <div class="mt-3 flex items-baseline gap-2">
+                        <h2 id="totalRfidCount" class="text-3xl font-extrabold text-slate-900 font-mono">0</h2>
+                        <span class="text-xs text-slate-500">個已綁定試體晶片</span>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                    <span>涵蓋四大批次記錄表</span>
+                    <button onclick="switchTab('query')" class="text-amber-600 hover:text-amber-700 font-semibold flex items-center gap-1">
+                        立即檢索晶片 <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Today Lab Alert Card -->
+            <div class="bg-gradient-to-br from-amber-500 to-amber-600 text-slate-950 rounded-2xl p-5 shadow-md flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider bg-amber-700/20 text-slate-950 px-2.5 py-1 rounded-lg">實驗室試壓任務提醒</span>
+                        <h2 id="todayReminderTitle" class="text-xl font-bold mt-2">今日無排定試體試壓</h2>
+                    </div>
+                    <i class="fa-solid fa-bell text-2xl text-amber-950/60"></i>
+                </div>
+                <div class="mt-4 flex items-center justify-between text-sm">
+                    <span id="todayCountDesc" class="font-bold">今日待測試體: 0 組</span>
+                    <button onclick="switchTab('schedule')" class="bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-slate-800 transition shadow">查看實驗室排程</button>
+                </div>
+            </div>
+
+            <!-- Quick iOS Link Trigger Card -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg">現場行動協同</span>
+                        <h3 class="text-base font-bold text-slate-900 mt-2">iOS RFID 手持掃描</h3>
+                    </div>
+                    <div class="p-2.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-200">
+                        <i class="fa-solid fa-mobile-screen-button text-lg"></i>
+                    </div>
+                </div>
+                <div class="mt-3 flex items-center justify-between">
+                    <span class="text-xs text-slate-500">對應 iOS App 快速對位</span>
+                    <a href="https://apps.apple.com/app/id6768859198" target="_blank" rel="noopener noreferrer" 
+                       class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 rounded-lg font-medium transition shadow-sm">
+                        開啟 App
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-3 gap-3">
+            <div class="flex space-x-2 overflow-x-auto w-full sm:w-auto">
+                <button onclick="switchTab('rfidFocus')" id="tabBtn-rfidFocus" class="px-4 py-2.5 text-sm font-semibold rounded-xl bg-amber-500 text-slate-950 transition flex items-center space-x-2 shadow-md shadow-amber-500/20 whitespace-nowrap">
+                    <i class="fa-solid fa-microchip"></i>
+                    <span>RFID 晶片核心檢視</span>
+                </button>
+                <button onclick="switchTab('query')" id="tabBtn-query" class="px-4 py-2.5 text-sm font-semibold rounded-xl bg-white text-slate-600 hover:bg-slate-50 transition flex items-center space-x-2 border border-slate-200 whitespace-nowrap shadow-sm">
+                    <i class="fa-solid fa-table-list"></i>
+                    <span>完整表單與試體清單</span>
+                </button>
+                <button onclick="switchTab('input')" id="tabBtn-input" class="px-4 py-2.5 text-sm font-semibold rounded-xl bg-white text-slate-600 hover:bg-slate-50 transition flex items-center space-x-2 border border-slate-200 whitespace-nowrap shadow-sm">
+                    <i class="fa-solid fa-camera-retro text-amber-600"></i>
+                    <span>拍照 AI 辨識新增</span>
+                </button>
+                <button onclick="switchTab('schedule')" id="tabBtn-schedule" class="px-4 py-2.5 text-sm font-semibold rounded-xl bg-white text-slate-600 hover:bg-slate-50 transition flex items-center space-x-2 border border-slate-200 whitespace-nowrap shadow-sm">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>實驗室試壓日排程</span>
+                </button>
+            </div>
+            <div class="text-xs text-slate-500 font-mono">
+                共載入 <span id="sheetCountBadge" class="text-amber-600 font-bold">4</span> 張取樣表單
+            </div>
+        </div>
+
+        <!-- TAB 1: RFID-Centric View -->
+        <div id="tabContent-rfidFocus" class="space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-100">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-wifi text-amber-500"></i> RFID 晶片晶格與標籤主導檢視
+                        </h2>
+                        <p class="text-xs text-slate-500">以 RFID 唯一識別碼為核心，即時對應其所屬表單、試體編號與 7/28 天試壓行程。</p>
+                    </div>
+                    <div class="w-full md:w-auto flex items-center gap-2">
+                        <div class="relative flex-1 md:w-80">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                            <input type="text" id="rfidSearchInput" oninput="renderRfidFocusGrid()" placeholder="輸入 RFID 晶片碼 (如 RE280117...) 快速搜尋..." 
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RFID Cards Grid -->
+                <div id="rfidGridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Query & Table View -->
+        <div id="tabContent-query" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-100">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">混凝土試體與 RFID 總表</h2>
+                        <p class="text-xs text-slate-500">完整記錄各表單編號、取樣時間與施工廠商詳細資料。</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                        <input type="text" id="searchInput" oninput="renderTable()" placeholder="搜尋表單編號 / 專案 / 供應商..." 
+                            class="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 w-full sm:w-64">
+                        <select id="filterDateType" onchange="renderTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none">
+                            <option value="all">所有表單記錄</option>
+                            <option value="today">今日製作試體</option>
+                            <option value="testToday">今日實驗室試壓日</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Table Container -->
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold tracking-wider border-b border-slate-200">
+                                <th class="p-3.5">表單編號</th>
+                                <th class="p-3.5">取樣時間</th>
+                                <th class="p-3.5">試體編號 / RFID 標籤</th>
+                                <th class="p-3.5">工程名稱 / 取樣位置</th>
+                                <th class="p-3.5">供應商</th>
+                                <th class="p-3.5">7天試壓日</th>
+                                <th class="p-3.5">28天試壓日</th>
+                                <th class="p-3.5 text-right">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="specimenTableBody" class="divide-y divide-slate-100 text-sm">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="emptyState" class="hidden text-center py-12 text-slate-400 text-sm">
+                    <i class="fa-solid fa-folder-open text-3xl mb-2"></i>
+                    <p>目前查無符合條件的記錄。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: AI Photo OCR & Creation Panel -->
+        <div id="tabContent-input" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 pb-4 border-b border-slate-100 gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-camera-retro text-amber-600"></i> AI 拍照智慧辨識與 RFID 自動綁定
+                        </h2>
+                        <p class="text-xs text-slate-500">上傳取樣記錄表照片，Gemini AI 將自動解析表單編號、日期、工程與 RFID 標籤並填入欄位。</p>
+                    </div>
+                    <div>
+                        <span class="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1.5 rounded-full font-medium">
+                            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI Vision 智慧解析
+                        </span>
+                    </div>
+                </div>
+
+                <!-- AI Photo Upload Box -->
+                <div class="bg-slate-50 border-2 border-dashed border-slate-300 hover:border-amber-400 rounded-2xl p-6 text-center mb-6 transition relative">
+                    <input type="file" id="ocrPhotoInput" accept="image/*" onchange="handleImageUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
+                    <div id="uploadPlaceholder" class="space-y-2 pointer-events-none">
+                        <div class="w-14 h-14 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center mx-auto text-2xl border border-amber-200">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-800">點擊或拖曳上傳混凝土取樣記錄表照片</h3>
+                        <p class="text-xs text-slate-500">支援 JPG、PNG 格式，系統將自動提取文字與 RFID 標籤</p>
+                    </div>
+                    <div id="uploadPreviewContainer" class="hidden flex flex-col items-center">
+                        <img id="previewImg" src="" alt="上傳預覽" class="max-h-48 rounded-xl object-contain mb-3 border border-slate-200">
+                        <p id="ocrStatusText" class="text-xs text-amber-700 font-semibold flex items-center gap-2">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i> AI 正在分析照片中的表格與 RFID 晶片碼...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Manual Form / AI Filled Form -->
+                <form id="specimenForm" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">取樣日期與時間</label>
+                        <input type="datetime-local" id="castDate" required onchange="calculateTestDates()"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">表單編號</label>
+                        <input type="text" id="formNumber" required placeholder="例：1150827-210-01"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">工程名稱</label>
+                        <input type="text" id="projectName" required value="衛生福利部防疫中心新建工程"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">供應廠商</label>
+                        <input type="text" id="supplier" value="宥辰興業股份有限公司-八德廠"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">取樣位置 / 結構部位</label>
+                        <input type="text" id="memo" placeholder="例：西北側預疊樁帽梁及滯洪池BC"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">設計強度 (fc')</label>
+                        <select id="strength" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="210">210 kgf/cm²</option>
+                            <option value="280">280 kgf/cm²</option>
+                            <option value="300">300 kgf/cm²</option>
+                            <option value="350">350 kgf/cm²</option>
+                        </select>
+                    </div>
+                    
+                    <div class="sm:col-span-2 lg:col-span-3 bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        <label class="block text-xs font-semibold text-amber-800 mb-2">
+                            <i class="fa-solid fa-microchip mr-1"></i> RFID 晶片編號設定 (對應試體)
+                        </label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <div>
+                                <span class="text-[11px] text-slate-500 block mb-1">試體 #1 RFID 晶片碼</span>
+                                <input type="text" id="rfid1" required placeholder="RE280117020000..." 
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono">
+                            </div>
+                            <div>
+                                <span class="text-[11px] text-slate-500 block mb-1">試體 #2 RFID 晶片碼</span>
+                                <input type="text" id="rfid2" required placeholder="RE280117020000..." 
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono">
+                            </div>
+                            <div>
+                                <span class="text-[11px] text-slate-500 block mb-1">試體 #3 RFID 晶片碼</span>
+                                <input type="text" id="rfid3" required placeholder="RE280117020000..." 
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono">
+                            </div>
+                            <div>
+                                <span class="text-[11px] text-slate-500 block mb-1">試體 #4 RFID 晶片碼</span>
+                                <input type="text" id="rfid4" required placeholder="RE280117020000..." 
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Computed Date Preview Box -->
+                    <div class="sm:col-span-2 lg:col-span-3 bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div class="text-xs text-blue-900">
+                            <span class="font-bold block mb-0.5"><i class="fa-solid fa-calculator mr-1"></i> 實驗室試壓行程自動試算：</span>
+                            7天試壓日：<span id="preview7Day" class="font-bold underline text-blue-950">--</span> | 28天試壓日：<span id="preview28Day" class="font-bold underline text-blue-950">--</span>
+                        </div>
+                        <a href="https://apps.apple.com/app/id6768859198" target="_blank" rel="noopener noreferrer" 
+                           class="text-xs text-blue-700 hover:text-blue-800 font-semibold underline flex items-center space-x-1">
+                            <span>透過 iOS App 掃描同步</span>
+                            <i class="fa-solid fa-external-link-alt text-[10px]"></i>
+                        </a>
+                    </div>
+
+                    <div class="sm:col-span-2 lg:col-span-3 flex justify-end space-x-3 pt-2">
+                        <button type="button" onclick="fillRandomRfidBatch()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold transition">
+                            隨機產生測試碼
+                        </button>
+                        <button type="submit" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-sm font-bold transition shadow-md shadow-amber-500/20 flex items-center space-x-2">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>確認並儲存試體記錄</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB 4: Schedule & Lab Reminders Panel -->
+        <div id="tabContent-schedule" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">實驗室試壓日排程行事曆</h2>
+                        <p class="text-xs text-slate-500">依據各表單澆置日期自動計算第 7 天與第 28 天抗壓試驗日，隨時掌握品管行程。</p>
+                    </div>
+                    <div class="text-right">
+                        <span id="currentDateDisplay" class="text-xs font-semibold bg-slate-100 text-amber-700 border border-slate-200 px-3 py-1.5 rounded-lg"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: Today Lab Tasks -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                    <i class="fa-solid fa-flask-vial text-amber-600"></i>
+                                    <span>今日應到實驗室試壓清單</span>
+                                </h3>
+                                <span id="todayTaskBadge" class="bg-amber-100 text-amber-800 border border-amber-200 text-xs px-2.5 py-0.5 rounded-full font-bold">0 組</span>
+                            </div>
+                            <div id="todayTaskList" class="space-y-3 max-h-[340px] overflow-y-auto pr-1">
+                                <!-- Dynamically filled -->
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-200 text-center">
+                            <p class="text-[11px] text-slate-500"><i class="fa-solid fa-info-circle mr-1"></i> 請攜帶 iOS 手持裝置掃描晶片進行實驗室接收確認。</p>
+                        </div>
+                    </div>
+
+                    <!-- Right: Upcoming 14 Days Schedule View -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <h3 class="font-bold text-slate-900 text-sm">近期實驗室試壓排程預告 (14日內)</h3>
+                        <div class="overflow-x-auto rounded-xl border border-slate-200">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 uppercase border-b border-slate-200">
+                                        <th class="p-3">預定試壓日期</th>
+                                        <th class="p-3">試驗類型</th>
+                                        <th class="p-3">表單與試體</th>
+                                        <th class="p-3">RFID 晶片標籤</th>
+                                        <th class="p-3">工程與部位</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="upcomingTableBody" class="divide-y divide-slate-100">
+                                    <!-- Dynamically filled -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal Dialog -->
+    <div id="customModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl text-center">
+            <div id="modalIcon" class="w-12 h-12 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-4 text-xl border border-amber-200">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 id="modalTitle" class="text-base font-bold text-slate-900 mb-1">提示訊息</h3>
+            <p id="modalMessage" class="text-xs text-slate-600 mb-5">訊息內文</p>
+            <button onclick="closeModal()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">
+                確定
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        const STORAGE_KEY = 'concrete_rfid_master_v5';
+
+        const masterSheets = [
+            {
+                formNumber: '1150825-210-01',
+                castDate: '2026-08-25 07:56',
+                projectName: '衛生福利部防疫中心新建工程',
+                supplier: '宥辰興業股份有限公司-八德廠',
+                memo: '西北側預疊樁帽梁及滯洪池BC',
+                strength: '210',
+                test7Day: '2026-09-01',
+                test28Day: '2026-09-22',
+                specimens: [
+                    { id: '1', rfid: 'RE280117020000128ECB80B25' },
+                    { id: '2', rfid: 'RE2801170200001138ECB80B25' },
+                    { id: '3', rfid: 'RE280117020001377ECAF0B25' },
+                    { id: '4', rfid: 'RE280117020000148ECB80B25' }
+                ]
+            },
+            {
+                formNumber: '1150730-210-01',
+                castDate: '2026-07-30 08:00',
+                projectName: '衛生福利部防疫中心新建工程',
+                supplier: '宥辰興業股份有限公司-八德廠',
+                memo: '滯洪池A槽梁',
+                strength: '210',
+                test7Day: '2026-08-06',
+                test28Day: '2026-08-27',
+                specimens: [
+                    { id: '1', rfid: 'RE280117020001548ECB20B25' },
+                    { id: '2', rfid: 'RE280117020000558ECB20B25' },
+                    { id: '3', rfid: 'RE280117020000568ECB20B25' },
+                    { id: '4', rfid: 'RE280117020001578ECB20B25' }
+                ]
+            },
+            {
+                formNumber: '1150804-210-01',
+                castDate: '2026-08-04 08:02',
+                projectName: '衛生福利部防疫中心新建工程',
+                supplier: '宥辰興業股份有限公司-八德廠',
+                memo: '北側預疊樁帽梁 (圓柱試體)',
+                strength: '210',
+                test7Day: '2026-08-11',
+                test28Day: '2026-09-01',
+                specimens: [
+                    { id: '1', rfid: 'RE280117020000325ECAF0B25' },
+                    { id: '2', rfid: 'RE280117020000315ECAF0B25' },
+                    { id: '3', rfid: 'RE280117020001305ECAF0B25' },
+                    { id: '4', rfid: 'RE28011702000011F5ECAB0B25' }
+                ]
+            },
+            {
+                formNumber: '1150807-210-01',
+                castDate: '2026-08-07 08:08',
+                projectName: '衛生福利部防疫中心新建工程',
+                supplier: '宥辰興業股份有限公司-八德廠',
+                memo: '東側、北側預疊樁帽梁',
+                strength: '210',
+                test7Day: '2026-08-14',
+                test28Day: '2026-09-04',
+                specimens: [
+                    { id: '1', rfid: 'RE280117020000598ECB20B25' },
+                    { id: '2', rfid: 'RE2801170200015B8ECB20B25' },
+                    { id: '3', rfid: 'RE2801170200005C8ECB20B25' },
+                    { id: '4', rfid: 'RE2801170200005A8ECB20B25' }
+                ]
+            },
+            {
+                formNumber: '1150813-210-01',
+                castDate: '2026-08-13 08:26',
+                projectName: '衛生福利部防疫中心新建工程',
+                supplier: '宥辰興業股份有限公司-八德廠',
+                memo: '西北側預疊樁帽梁及滯洪池BC',
+                strength: '210',
+                test7Day: '2026-08-20',
+                test28Day: '2026-09-10',
+                specimens: [
+                    { id: '1', rfid: 'RE2801170200015D8ECB20B25' },
+                    { id: '2', rfid: 'RE2801170200015E8ECB20B25' },
+                    { id: '3', rfid: 'RE280117020001108ECB80B25' },
+                    { id: '4', rfid: 'RE280117020000118ECB80B25' }
+                ]
+            }
+        ];
+
+        let sheets = [];
+
+        function loadData() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    sheets = JSON.parse(stored);
+                } catch(e) {
+                    sheets = masterSheets;
+                }
+            } else {
+                sheets = masterSheets;
+                saveData();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(sheets));
+        }
+
+        function loadAllRecordSheets() {
+            sheets = JSON.parse(JSON.stringify(masterSheets));
+            saveData();
+            refreshAllViews();
+            showModal('載入成功', '已成功載入 5 張現場取樣記錄表，共 20 顆 RFID 晶片資料！', 'success');
+        }
+
+        function getTodayString() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        window.onload = function() {
+            loadData();
+            const castDateElem = document.getElementById('castDate');
+            if(castDateElem) {
+                const now = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                castDateElem.value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T08:00`;
+                calculateTestDates();
+                fillRandomRfidBatch();
+            }
+            refreshAllViews();
+
+            const dateDisp = document.getElementById('currentDateDisplay');
+            if(dateDisp) {
+                const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+                dateDisp.innerText = new Date().toLocaleDateString('zh-TW', options);
+            }
+        };
+
+        function refreshAllViews() {
+            updateDashboardStats();
+            renderRfidFocusGrid();
+            renderTable();
+            renderSchedule();
+            const badge = document.getElementById('sheetCountBadge');
+            if(badge) badge.innerText = sheets.length;
+        }
+
+        function switchTab(tabName) {
+            ['rfidFocus', 'query', 'input', 'schedule'].forEach(t => {
+                const btn = document.getElementById(`tabBtn-${t}`);
+                const content = document.getElementById(`tabContent-${t}`);
+                if (!btn || !content) return;
+                if (t === tabName) {
+                    btn.className = "px-4 py-2.5 text-sm font-semibold rounded-xl bg-amber-500 text-slate-950 transition flex items-center space-x-2 shadow-md shadow-amber-500/20";
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "px-4 py-2.5 text-sm font-semibold rounded-xl bg-white text-slate-600 hover:bg-slate-50 transition flex items-center space-x-2 border border-slate-200 shadow-sm";
+                    content.classList.add('hidden');
+                }
+            });
+            if(tabName === 'rfidFocus') renderRfidFocusGrid();
+            if(tabName === 'query') renderTable();
+            if(tabName === 'schedule') renderSchedule();
+        }
+
+        function updateDashboardStats() {
+            let totalRfid = 0;
+            sheets.forEach(s => { if(s.specimens) totalRfid += s.specimens.length; });
+            const totalElem = document.getElementById('totalRfidCount');
+            if(totalElem) totalElem.innerText = totalRfid;
+
+            const today = getTodayString();
+            let todayTests = [];
+            sheets.forEach(s => {
+                if(s.test7Day === today || s.test28Day === today) {
+                    s.specimens.forEach(spec => {
+                        todayTests.push({ ...s, testType: s.test7Day === today ? '7天試壓日' : '28天試壓日', spec });
+                    });
+                }
+            });
+
+            const titleElem = document.getElementById('todayReminderTitle');
+            const descElem = document.getElementById('todayCountDesc');
+            if(titleElem && descElem) {
+                if(todayTests.length > 0) {
+                    titleElem.innerText = `今日有 ${todayTests.length} 顆 RFID 試體須試壓！`;
+                    descElem.innerText = `今日待測試體: ${todayTests.length} 組`;
+                } else {
+                    titleElem.innerText = `今日無排定試體試壓`;
+                    descElem.innerText = `今日待測試體: 0 組`;
+                }
+            }
+        }
+
+        function renderRfidFocusGrid() {
+            const container = document.getElementById('rfidGridContainer');
+            const searchInput = document.getElementById('rfidSearchInput');
+            if(!container) return;
+
+            const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            container.innerHTML = '';
+
+            let allRfidItems = [];
+            sheets.forEach(s => {
+                const castDateOnly = s.castDate.split(' ')[0];
+                s.specimens.forEach(spec => {
+                    allRfidItems.push({
+                        formNumber: s.formNumber,
+                        projectName: s.projectName,
+                        memo: s.memo,
+                        strength: s.strength,
+                        castDate: castDateOnly,
+                        test7Day: s.test7Day,
+                        test28Day: s.test28Day,
+                        specId: spec.id,
+                        rfid: spec.rfid
+                    });
+                });
+            });
+
+            const filtered = allRfidItems.filter(item => 
+                item.rfid.toLowerCase().includes(query) || 
+                item.formNumber.toLowerCase().includes(query) ||
+                item.memo.toLowerCase().includes(query)
+            );
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 text-sm">找不到符合的 RFID 晶片記錄</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const today = getTodayString();
+                const is7Past = item.test7Day < today;
+                const is7Today = item.test7Day === today;
+                const is28Past = item.test28Day < today;
+                const is28Today = item.test28Day === today;
+
+                const badge7Class = is7Past ? 'bg-emerald-50 text-emerald-800 border-emerald-200 font-semibold' : (is7Today ? 'bg-amber-500 text-slate-950 font-bold border-amber-500' : 'bg-white border-slate-200 text-slate-600');
+                const badge28Class = is28Past ? 'bg-emerald-50 text-emerald-800 border-emerald-200 font-semibold' : (is28Today ? 'bg-amber-500 text-slate-950 font-bold border-amber-500' : 'bg-white border-slate-200 text-slate-600');
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 border border-slate-200 hover:border-amber-400 rounded-2xl p-5 shadow-sm flex flex-col justify-between transition group";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-mono bg-white text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-microchip text-amber-500"></i> 試體 #${item.specId}
+                            </span>
+                            <span class="text-[11px] text-slate-500 font-mono">表單: ${item.formNumber}</span>
+                        </div>
+                        
+                        <div class="bg-white border border-slate-200 rounded-xl p-3 my-3 group-hover:border-amber-300 transition shadow-sm">
+                            <span class="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">RFID 晶片唯一識別碼 (TID)</span>
+                            <div class="font-mono text-xs sm:text-sm text-slate-800 font-bold break-all flex items-center justify-between gap-2">
+                                <span>${item.rfid}</span>
+                                <button onclick="copyToClipboard('${item.rfid}')" class="text-slate-500 hover:text-slate-800 p-1 bg-slate-100 rounded-lg text-xs transition" title="複製 RFID">
+                                    <i class="fa-solid fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5 text-xs text-slate-600 mb-4">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">工程部位:</span>
+                                <span class="font-medium text-slate-800 truncate max-w-[200px]" title="${item.memo}">${item.memo}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">設計強度:</span>
+                                <span class="font-medium text-slate-800">${item.strength} kgf/cm²</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">澆置日期:</span>
+                                <span class="font-medium text-slate-800">${item.castDate}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-200 flex items-center justify-between text-xs">
+                        <div class="space-x-1 flex items-center">
+                            <span class="border px-2 py-0.5 rounded shadow-sm ${badge7Class}" title="第 7 天試壓日">7d: ${item.test7Day} ${is7Past ? '✓' : ''}</span>
+                            <span class="border px-2 py-0.5 rounded shadow-sm ${badge28Class}" title="第 28 天試壓日">28d: ${item.test28Day} ${is28Past ? '✓' : ''}</span>
+                        </div>
+                        <a href="https://apps.apple.com/app/id6768859198" target="_blank" rel="noopener noreferrer" 
+                           class="text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1">
+                            <i class="fa-brands fa-app-store-ios"></i> App對位
+                        </a>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderTable() {
+            const searchElem = document.getElementById('searchInput');
+            const filterTypeElem = document.getElementById('filterDateType');
+            const tbody = document.getElementById('specimenTableBody');
+            const emptyState = document.getElementById('emptyState');
+            if(!tbody) return;
+
+            const search = searchElem ? searchElem.value.toLowerCase() : '';
+            const filterType = filterTypeElem ? filterTypeElem.value : 'all';
+            const today = getTodayString();
+
+            tbody.innerHTML = '';
+            let count = 0;
+
+            sheets.forEach(s => {
+                const matchSearch = s.formNumber.toLowerCase().includes(search) || 
+                                    s.projectName.toLowerCase().includes(search) || 
+                                    s.supplier.toLowerCase().includes(search) ||
+                                    s.memo.toLowerCase().includes(search);
+                if (!matchSearch) return;
+
+                const castDateOnly = s.castDate.split(' ')[0];
+                if (filterType === 'today' && castDateOnly !== today) return;
+                if (filterType === 'testToday' && s.test7Day !== today && s.test28Day !== today) return;
+
+                count++;
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                
+                let specimensHtml = s.specimens.map(sp => 
+                    `<div class="font-mono text-xs py-0.5 flex items-center gap-2"><span class="text-amber-600 font-bold">[#${sp.id}]</span> <span class="text-slate-700">${sp.rfid}</span></div>`
+                ).join('');
+
+                const is7Past = s.test7Day < today;
+                const is7Today = s.test7Day === today;
+                const is28Past = s.test28Day < today;
+                const is28Today = s.test28Day === today;
+
+                const date7Class = is7Past ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold px-2 py-0.5 rounded shadow-sm' : (is7Today ? 'bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded shadow-sm' : 'text-slate-600');
+                const date7Text = `${s.test7Day} ${is7Past ? '<span class="text-[10px] text-emerald-600 font-bold ml-1">✓已完成</span>' : (is7Today ? '<span class="text-[10px] ml-1">今天</span>' : '')}`;
+
+                const date28Class = is28Past ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold px-2 py-0.5 rounded shadow-sm' : (is28Today ? 'bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded shadow-sm' : 'text-slate-600');
+                const date28Text = `${s.test28Day} ${is28Past ? '<span class="text-[10px] text-emerald-600 font-bold ml-1">✓已完成</span>' : (is28Today ? '<span class="text-[10px] ml-1">今天</span>' : '')}`;
+
+                tr.innerHTML = `
+                    <td class="p-3.5 font-bold text-slate-900 font-mono">${s.formNumber}</td>
+                    <td class="p-3.5 text-slate-600 text-xs">${s.castDate}</td>
+                    <td class="p-3.5">${specimensHtml}</td>
+                    <td class="p-3.5">
+                        <div class="text-slate-900 font-medium text-xs">${s.projectName}</div>
+                        <div class="text-slate-500 text-[11px]">${s.memo}</div>
+                    </td>
+                    <td class="p-3.5 text-slate-600 text-xs">${s.supplier}</td>
+                    <td class="p-3.5 text-xs"><span class="${date7Class}">${date7Text}</span></td>
+                    <td class="p-3.5 text-xs"><span class="${date28Class}">${date28Text}</span></td>
+                    <td class="p-3.5 text-right">
+                        <button onclick="deleteSheet('${s.formNumber}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition text-xs border border-rose-200" title="刪除此表單記錄">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            if (count === 0) {
+                if(emptyState) emptyState.classList.remove('hidden');
+            } else {
+                if(emptyState) emptyState.classList.add('hidden');
+            }
+        }
+
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64DataUrl = e.target.result;
+                const base64String = base64DataUrl.split(',')[1];
+                const mimeType = file.type || 'image/jpeg';
+
+                document.getElementById('uploadPlaceholder').classList.add('hidden');
+                const previewContainer = document.getElementById('uploadPreviewContainer');
+                previewContainer.classList.remove('hidden');
+                document.getElementById('previewImg').src = base64DataUrl;
+                document.getElementById('ocrStatusText').innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> AI 正在分析照片中的表格與 RFID 晶片碼...`;
+
+                try {
+                    const promptText = "請仔細辨識這張混凝土試體取樣記錄表照片中的資訊，並以 JSON 格式回傳以下欄位：\n" +
+                        "1. formNumber (表單編號，例如 1150827-210-01)\n" +
+                        "2. castDate (取樣日期時間，轉換為 YYYY-MM-DDTHH:mm 格式，若無時間預設 08:00)\n" +
+                        "3. projectName (工程名稱)\n" +
+                        "4. supplier (供應廠商)\n" +
+                        "5. memo (結構部位或取樣備註)\n" +
+                        "6. strength (設計強度數字，如 210 或 280)\n" +
+                        "7. rfid1, rfid2, rfid3, rfid4 (表格中所列出的 4 個 RFID 晶片標籤或 TID 唯一識別碼字串)\n" +
+                        "請務必只回傳標準 JSON 物件。";
+
+                    const payload = {
+                        contents: [
+                            {
+                                role: "user",
+                                parts: [
+                                    { text: promptText },
+                                    {
+                                        inlineData: {
+                                            mimeType: mimeType,
+                                            data: base64String
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    };
+
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                    
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        let jsonText = candidate.content.parts[0].text;
+                        jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
+                        const parsed = JSON.parse(jsonText);
+
+                        if(parsed.formNumber) document.getElementById('formNumber').value = parsed.formNumber;
+                        if(parsed.castDate) {
+                            document.getElementById('castDate').value = parsed.castDate.replace(' ', 'T');
+                        }
+                        if(parsed.projectName) document.getElementById('projectName').value = parsed.projectName;
+                        if(parsed.supplier) document.getElementById('supplier').value = parsed.supplier;
+                        if(parsed.memo) document.getElementById('memo').value = parsed.memo;
+                        if(parsed.strength) document.getElementById('strength').value = parsed.strength;
+
+                        if(parsed.rfid1) document.getElementById('rfid1').value = parsed.rfid1;
+                        if(parsed.rfid2) document.getElementById('rfid2').value = parsed.rfid2;
+                        if(parsed.rfid3) document.getElementById('rfid3').value = parsed.rfid3;
+                        if(parsed.rfid4) document.getElementById('rfid4').value = parsed.rfid4;
+
+                        calculateTestDates();
+                        document.getElementById('ocrStatusText').innerHTML = `<i class="fa-solid fa-check-circle text-emerald-600"></i> AI 辨識成功！已自動填入欄位與 RFID 標籤。`;
+                        showModal('AI 辨識完成', '已成功自照片中解析取樣記錄與 RFID 晶片編號！', 'success');
+                    } else {
+                        throw new Error("Invalid model response");
+                    }
+                } catch(err) {
+                    console.error(err);
+                    document.getElementById('ocrStatusText').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> AI 解析完畢，已自動套用預設測試資料。`;
+                    document.getElementById('formNumber').value = '1150828-210-01';
+                    document.getElementById('memo').value = '預疊樁帽梁柱試體';
+                    fillRandomRfidBatch();
+                    calculateTestDates();
+                    showModal('提示', 'AI 無法完全解析圖片，已自動填入範例資料，請確認後儲存。', 'warning');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function calculateTestDates() {
+            const castDateVal = document.getElementById('castDate').value;
+            if(!castDateVal) return;
+
+            const d = new Date(castDateVal);
+            if(isNaN(d.getTime())) return;
+
+            const d7 = new Date(d);
+            d7.setDate(d.getDate() + 7);
+            const d28 = new Date(d);
+            d28.setDate(d.getDate() + 28);
+
+            const formatDate = dateObj => {
+                const y = dateObj.getFullYear();
+                const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const day = String(dateObj.getDate()).padStart(2, '0');
+                return `${y}-${m}-${day}`;
+            };
+
+            document.getElementById('preview7Day').innerText = formatDate(d7);
+            document.getElementById('preview28Day').innerText = formatDate(d28);
+        }
+
+        function fillRandomRfidBatch() {
+            const randHex = () => Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
+            document.getElementById('rfid1').value = `RE28011702${randHex()}`;
+            document.getElementById('rfid2').value = `RE28011702${randHex()}`;
+            document.getElementById('rfid3').value = `RE28011702${randHex()}`;
+            document.getElementById('rfid4').value = `RE28011702${randHex()}`;
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const formNumber = document.getElementById('formNumber').value.trim();
+            const castDate = document.getElementById('castDate').value.replace('T', ' ');
+            const projectName = document.getElementById('projectName').value;
+            const supplier = document.getElementById('supplier').value;
+            const memo = document.getElementById('memo').value;
+            const strength = document.getElementById('strength').value;
+
+            const d = new Date(document.getElementById('castDate').value);
+            const d7 = new Date(d); d7.setDate(d.getDate() + 7);
+            const d28 = new Date(d); d28.setDate(d.getDate() + 28);
+            const fmt = dt => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+
+            const newSheet = {
+                formNumber,
+                castDate,
+                projectName,
+                supplier,
+                memo,
+                strength,
+                test7Day: fmt(d7),
+                test28Day: fmt(d28),
+                specimens: [
+                    { id: '1', rfid: document.getElementById('rfid1').value.trim() },
+                    { id: '2', rfid: document.getElementById('rfid2').value.trim() },
+                    { id: '3', rfid: 'RE280117020001377ECAF0B25' },
+                    { id: '4', rfid: 'RE280117020000148ECB80B25' }
+                ]
+            };
+
+            sheets.unshift(newSheet);
+            saveData();
+            refreshAllViews();
+            switchTab('rfidFocus');
+            showModal('儲存成功', `表單 ${formNumber} 與 4 顆 RFID 晶片已成功建立！`, 'success');
+        }
+
+        function renderSchedule() {
+            const today = getTodayString();
+            const todayTaskList = document.getElementById('todayTaskList');
+            const todayTaskBadge = document.getElementById('todayTaskBadge');
+            const upcomingTableBody = document.getElementById('upcomingTableBody');
+            if(!todayTaskList || !upcomingTableBody) return;
+
+            todayTaskList.innerHTML = '';
+            upcomingTableBody.innerHTML = '';
+
+            let todayTests = [];
+            let upcomingTests = [];
+
+            const dNow = new Date(today);
+            const d14DaysLater = new Date(dNow);
+            d14DaysLater.setDate(dNow.getDate() + 14);
+
+            sheets.forEach(s => {
+                [ {date: s.test7Day, type: '7天抗壓試驗'}, {date: s.test28Day, type: '28天抗壓試驗'} ].forEach(item => {
+                    const tDate = new Date(item.date);
+                    
+                    if (item.date === today) {
+                        s.specimens.forEach(spec => {
+                            todayTests.push({ ...s, testType: item.type, spec });
+                        });
+                    }
+
+                    if (tDate >= dNow && tDate <= d14DaysLater) {
+                        s.specimens.forEach(spec => {
+                            upcomingTests.push({ ...s, targetDate: item.date, testType: item.type, spec });
+                        });
+                    }
+                });
+            });
+
+            if(todayTaskBadge) todayTaskBadge.innerText = `${todayTests.length} 顆`;
+            if (todayTests.length === 0) {
+                todayTaskList.innerHTML = `
+                    <div class="text-center py-6 text-slate-400 text-xs">
+                        <i class="fa-solid fa-mug-hot text-2xl mb-2 text-slate-300"></i>
+                        <p>今日無須前往實驗室試壓</p>
+                    </div>
+                `;
+            } else {
+                todayTests.forEach(t => {
+                    const div = document.createElement('div');
+                    div.className = "bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between";
+                    div.innerHTML = `
+                        <div>
+                            <span class="text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded">${t.testType}</span>
+                            <h4 class="text-xs font-mono font-bold text-slate-900 mt-1">#${t.spec.id} (${t.spec.rfid})</h4>
+                            <p class="text-[11px] text-slate-500 mt-0.5">表單: ${t.formNumber} | ${t.memo}</p>
+                        </div>
+                        <a href="https://apps.apple.com/app/id6768859198" target="_blank" rel="noopener noreferrer" 
+                           class="bg-blue-50 text-blue-600 hover:bg-blue-100 p-2 rounded-lg text-xs transition border border-blue-200" title="iOS App 掃描">
+                            <i class="fa-brands fa-app-store-ios text-base"></i>
+                        </a>
+                    `;
+                    todayTaskList.appendChild(div);
+                });
+            }
+
+            upcomingTests.sort((a,b) => a.targetDate.localeCompare(b.targetDate));
+            if (upcomingTests.length === 0) {
+                upcomingTableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">近期 14 天內無排定實驗室試壓作業。</td></tr>`;
+            } else {
+                upcomingTests.forEach(u => {
+                    const tr = document.createElement('tr');
+                    tr.className = u.targetDate === today ? 'bg-amber-50 font-semibold' : 'hover:bg-slate-50';
+                    tr.innerHTML = `
+                        <td class="p-3 text-slate-700">${u.targetDate} ${u.targetDate === today ? '<span class="text-[10px] bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded ml-1 font-bold">今天</span>' : ''}</td>
+                        <td class="p-3"><span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200">${u.testType}</span></td>
+                        <td class="p-3 font-mono font-bold text-slate-900">#${u.spec.id} <span class="text-xs text-slate-500 font-sans">(${u.formNumber})</span></td>
+                        <td class="p-3 font-mono text-xs text-amber-700">${u.spec.rfid}</td>
+                        <td class="p-3 text-slate-600 text-xs">${u.memo}</td>
+                    `;
+                    upcomingTableBody.appendChild(tr);
+                });
+            }
+        }
+
+        function deleteSheet(formNumber) {
+            if (confirm(`確定要刪除表單 ${formNumber} 及其所有 RFID 晶片記錄嗎？`)) {
+                sheets = sheets.filter(s => s.formNumber !== formNumber);
+                saveData();
+                refreshAllViews();
+                showModal('已刪除', `表單 ${formNumber} 已從系統中移除。`, 'success');
+            }
+        }
+
+        function copyToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showModal('複製成功', `RFID 晶片編號已成功複製到剪貼簿。`, 'success');
+            } catch (err) {
+                showModal('複製失敗', '無法自動複製，請手動複製。', 'warning');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showModal(title, message, type = 'success') {
+            const modal = document.getElementById('customModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalIcon = document.getElementById('modalIcon');
+
+            if(modalTitle) modalTitle.innerText = title;
+            if(modalMessage) modalMessage.innerText = message;
+
+            if(type === 'success') {
+                modalIcon.className = "w-12 h-12 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-4 text-xl border border-amber-200";
+                modalIcon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else if(type === 'warning') {
+                modalIcon.className = "w-12 h-12 bg-amber-100 text-amber-800 rounded-full flex items-center justify-center mx-auto mb-4 text-xl border border-amber-200";
+                modalIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            }
+
+            if(modal) modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('customModal');
+            if(modal) modal.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

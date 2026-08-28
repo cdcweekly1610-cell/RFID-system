@@ -47,12 +47,7 @@
                     <span class="hidden sm:inline">重新載入示範記錄表</span>
                     <span class="sm:hidden">載入表單</span>
                 </button>
-                <a href="https://apps.apple.com/app/id6768859198" target="_blank" rel="noopener noreferrer" 
-                   class="bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl transition flex items-center space-x-2 shadow-md shadow-blue-600/20">
-                    <i class="fa-brands fa-app-store-ios text-lg"></i>
-                    <span class="hidden sm:inline">iOS 掃描 App</span>
-                    <span class="sm:hidden">iOS App</span>
-                </a>
+                <!-- 移除了原本的 iOS 掃描 App 連結按鈕 -->
             </div>
         </div>
     </header>
@@ -60,23 +55,42 @@
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
         
         <!-- Top Metrics & RFID Focus Stats -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- 修改為 2 欄版面 (原為 3 欄) -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- RFID Active Badge Card -->
             <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-hidden">
                 <div class="absolute -right-4 -bottom-4 text-slate-100 text-7xl font-bold select-none pointer-events-none">
                     <i class="fa-solid fa-wifi"></i>
                 </div>
                 <div>
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between mb-3">
                         <span class="text-xs font-semibold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-lg">RFID 晶片庫存總覽</span>
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     </div>
-                    <div class="mt-3 flex items-baseline gap-2">
-                        <h2 id="totalRfidCount" class="text-3xl font-extrabold text-slate-900 font-mono">0</h2>
-                        <span class="text-xs text-slate-500">個已綁定試體晶片</span>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 relative z-10">
+                        <!-- 標籤總數 -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex flex-col items-center justify-center shadow-sm">
+                            <span class="text-[11px] text-slate-500 font-semibold mb-0.5">標籤總數</span>
+                            <span class="text-xl font-bold text-slate-800 font-mono">600</span>
+                        </div>
+                        <!-- 已使用 -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-2.5 flex flex-col items-center justify-center shadow-sm">
+                            <span class="text-[11px] text-blue-700 font-semibold mb-0.5">已使用</span>
+                            <span id="usedRfidCount" class="text-xl font-bold text-blue-800 font-mono">0</span>
+                        </div>
+                        <!-- 已試驗 -->
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 flex flex-col items-center justify-center shadow-sm">
+                            <span class="text-[11px] text-emerald-700 font-semibold mb-0.5">已試驗</span>
+                            <span id="testedRfidCount" class="text-xl font-bold text-emerald-800 font-mono">0</span>
+                        </div>
+                        <!-- 尚未試驗 -->
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5 flex flex-col items-center justify-center shadow-sm">
+                            <span class="text-[11px] text-amber-700 font-semibold mb-0.5">尚未試驗</span>
+                            <span id="untestedRfidCount" class="text-xl font-bold text-amber-800 font-mono">0</span>
+                        </div>
                     </div>
                 </div>
-                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600 relative z-10">
                     <span>涵蓋四大批次記錄表</span>
                     <button onclick="switchTab('query')" class="text-amber-600 hover:text-amber-700 font-semibold flex items-center gap-1">
                         立即檢索晶片 <i class="fa-solid fa-arrow-right text-[10px]"></i>
@@ -98,26 +112,8 @@
                     <button onclick="switchTab('schedule')" class="bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-slate-800 transition shadow">查看實驗室排程</button>
                 </div>
             </div>
-
-            <!-- Quick iOS Link Trigger Card -->
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <span class="text-xs font-semibold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg">現場行動協同</span>
-                        <h3 class="text-base font-bold text-slate-900 mt-2">iOS RFID 手持掃描</h3>
-                    </div>
-                    <div class="p-2.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-200">
-                        <i class="fa-solid fa-mobile-screen-button text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-3 flex items-center justify-between">
-                    <span class="text-xs text-slate-500">對應 iOS App 快速對位</span>
-                    <a href="https://apps.apple.com/app/id6768859198" target="_blank" rel="noopener noreferrer" 
-                       class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 rounded-lg font-medium transition shadow-sm">
-                        開啟 App
-                    </a>
-                </div>
-            </div>
+            
+            <!-- 移除了原本的 iOS 掃描 App 快速卡片 -->
         </section>
 
         <!-- Navigation Tabs -->
@@ -195,14 +191,14 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold tracking-wider border-b border-slate-200">
-                                <th class="p-3.5">表單編號</th>
-                                <th class="p-3.5">取樣時間</th>
-                                <th class="p-3.5">試體編號 / RFID 標籤</th>
+                                <th class="p-3.5 whitespace-nowrap">表單編號</th>
+                                <th class="p-3.5 whitespace-nowrap">取樣時間</th>
+                                <th class="p-3.5 min-w-[200px]">試體編號 / RFID 標籤</th>
                                 <th class="p-3.5">工程名稱 / 取樣位置</th>
-                                <th class="p-3.5">供應商</th>
-                                <th class="p-3.5">7天試壓日</th>
-                                <th class="p-3.5">28天試壓日</th>
-                                <th class="p-3.5 text-right">操作</th>
+                                <th class="p-3.5 whitespace-nowrap">供應商</th>
+                                <th class="p-3.5 whitespace-nowrap">7天試壓日</th>
+                                <th class="p-3.5 whitespace-nowrap">28天試壓日</th>
+                                <th class="p-3.5 text-right whitespace-nowrap">操作</th>
                             </tr>
                         </thead>
                         <tbody id="specimenTableBody" class="divide-y divide-slate-100 text-sm">
@@ -317,17 +313,12 @@
                         </div>
                     </div>
 
-                    <!-- Computed Date Preview Box -->
-                    <div class="sm:col-span-2 lg:col-span-3 bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <!-- Computed Date Preview Box (Removed iOS Link) -->
+                    <div class="sm:col-span-2 lg:col-span-3 bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-col justify-center gap-3">
                         <div class="text-xs text-blue-900">
                             <span class="font-bold block mb-0.5"><i class="fa-solid fa-calculator mr-1"></i> 實驗室試壓行程自動試算：</span>
                             7天試壓日：<span id="preview7Day" class="font-bold underline text-blue-950">--</span> | 28天試壓日：<span id="preview28Day" class="font-bold underline text-blue-950">--</span>
                         </div>
-                        <a href="https://apps.apple.com/app/id6768859198" target="_blank" rel="noopener noreferrer" 
-                           class="text-xs text-blue-700 hover:text-blue-800 font-semibold underline flex items-center space-x-1">
-                            <span>透過 iOS App 掃描同步</span>
-                            <i class="fa-solid fa-external-link-alt text-[10px]"></i>
-                        </a>
                     </div>
 
                     <div class="sm:col-span-2 lg:col-span-3 flex justify-end space-x-3 pt-2">
@@ -372,7 +363,8 @@
                             </div>
                         </div>
                         <div class="mt-4 pt-3 border-t border-slate-200 text-center">
-                            <p class="text-[11px] text-slate-500"><i class="fa-solid fa-info-circle mr-1"></i> 請攜帶 iOS 手持裝置掃描晶片進行實驗室接收確認。</p>
+                            <!-- 已移除 iOS 手持裝置文字 -->
+                            <p class="text-[11px] text-slate-500"><i class="fa-solid fa-info-circle mr-1"></i> 請確實進行實驗室接收與試壓確認。</p>
                         </div>
                     </div>
 
@@ -383,10 +375,10 @@
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr class="bg-slate-50 text-slate-500 uppercase border-b border-slate-200">
-                                        <th class="p-3">預定試壓日期</th>
-                                        <th class="p-3">試驗類型</th>
-                                        <th class="p-3">表單與試體</th>
-                                        <th class="p-3">RFID 晶片標籤</th>
+                                        <th class="p-3 whitespace-nowrap">預定試壓日期</th>
+                                        <th class="p-3 whitespace-nowrap">試驗類型</th>
+                                        <th class="p-3 whitespace-nowrap">表單與試體</th>
+                                        <th class="p-3 whitespace-nowrap">RFID 晶片標籤</th>
                                         <th class="p-3">工程與部位</th>
                                     </tr>
                                 </thead>
@@ -572,10 +564,10 @@
                 const content = document.getElementById(`tabContent-${t}`);
                 if (!btn || !content) return;
                 if (t === tabName) {
-                    btn.className = "px-4 py-2.5 text-sm font-semibold rounded-xl bg-amber-500 text-slate-950 transition flex items-center space-x-2 shadow-md shadow-amber-500/20";
+                    btn.className = "px-4 py-2.5 text-sm font-semibold rounded-xl bg-amber-500 text-slate-950 transition flex items-center space-x-2 shadow-md shadow-amber-500/20 whitespace-nowrap";
                     content.classList.remove('hidden');
                 } else {
-                    btn.className = "px-4 py-2.5 text-sm font-semibold rounded-xl bg-white text-slate-600 hover:bg-slate-50 transition flex items-center space-x-2 border border-slate-200 shadow-sm";
+                    btn.className = "px-4 py-2.5 text-sm font-semibold rounded-xl bg-white text-slate-600 hover:bg-slate-50 transition flex items-center space-x-2 border border-slate-200 shadow-sm whitespace-nowrap";
                     content.classList.add('hidden');
                 }
             });
@@ -585,10 +577,36 @@
         }
 
         function updateDashboardStats() {
-            let totalRfid = 0;
-            sheets.forEach(s => { if(s.specimens) totalRfid += s.specimens.length; });
-            const totalElem = document.getElementById('totalRfidCount');
-            if(totalElem) totalElem.innerText = totalRfid;
+            let totalUsed = 0;
+            let totalTested = 0;
+            let totalUntested = 0;
+            const todayStr = getTodayString();
+
+            sheets.forEach(s => {
+                if (s.specimens) {
+                    const count = s.specimens.length;
+                    totalUsed += count;
+                    
+                    const half = Math.floor(count / 2);
+                    // 根據目前日期判斷是否已達/超過試驗日
+                    if (todayStr >= s.test28Day) {
+                        totalTested += count;
+                    } else if (todayStr >= s.test7Day) {
+                        totalTested += half;           // 過了7天試驗日，假設一半的試體已試壓
+                        totalUntested += (count - half);
+                    } else {
+                        totalUntested += count;        // 皆尚未試壓
+                    }
+                }
+            });
+
+            const usedElem = document.getElementById('usedRfidCount');
+            const testedElem = document.getElementById('testedRfidCount');
+            const untestedElem = document.getElementById('untestedRfidCount');
+
+            if(usedElem) usedElem.innerText = totalUsed;
+            if(testedElem) testedElem.innerText = totalTested;
+            if(untestedElem) untestedElem.innerText = totalUntested;
 
             const today = getTodayString();
             let todayTests = [];
@@ -662,6 +680,7 @@
 
                 const card = document.createElement('div');
                 card.className = "bg-slate-50 border border-slate-200 hover:border-amber-400 rounded-2xl p-5 shadow-sm flex flex-col justify-between transition group";
+                // 移除了原本右下角的 iOS App 對位連結
                 card.innerHTML = `
                     <div>
                         <div class="flex items-center justify-between mb-3">
@@ -692,7 +711,7 @@
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-slate-400">澆置日期:</span>
-                                <span class="font-medium text-slate-800">${item.castDate}</span>
+                                <span class="font-medium text-slate-800 whitespace-nowrap">${item.castDate.replace(/-/g, '/')}</span>
                             </div>
                         </div>
                     </div>
@@ -701,11 +720,10 @@
                         <div class="space-x-1 flex items-center">
                             <span class="border px-2 py-0.5 rounded shadow-sm ${badge7Class}" title="第 7 天試壓日">7d: ${item.test7Day} ${is7Past ? '✓' : ''}</span>
                             <span class="border px-2 py-0.5 rounded shadow-sm ${badge28Class}" title="第 28 天試壓日">28d: ${item.test28Day} ${is28Past ? '✓' : ''}</span>
+                        <div class="space-x-1">
+                            <span class="bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded shadow-sm inline-block whitespace-nowrap ${is7Today ? 'bg-amber-500 text-slate-950 border-amber-500 font-bold' : ''}" title="第 7 天試壓日">7d: ${item.test7Day.replace(/-/g, '/')}</span>
+                            <span class="bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded shadow-sm inline-block whitespace-nowrap ${is28Today ? 'bg-amber-500 text-slate-950 border-amber-500 font-bold' : ''}" title="第 28 天試壓日">28d: ${item.test28Day.replace(/-/g, '/')}</span>
                         </div>
-                        <a href="https://apps.apple.com/app/id6768859198" target="_blank" rel="noopener noreferrer" 
-                           class="text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1">
-                            <i class="fa-brands fa-app-store-ios"></i> App對位
-                        </a>
                     </div>
                 `;
                 container.appendChild(card);
@@ -745,29 +763,28 @@
                     `<div class="font-mono text-xs py-0.5 flex items-center gap-2"><span class="text-amber-600 font-bold">[#${sp.id}]</span> <span class="text-slate-700">${sp.rfid}</span></div>`
                 ).join('');
 
-                const is7Past = s.test7Day < today;
-                const is7Today = s.test7Day === today;
-                const is28Past = s.test28Day < today;
-                const is28Today = s.test28Day === today;
+                // 判斷日期是否已過 (小於等於今天)
+                const is7Past = s.test7Day <= today;
+                const is28Past = s.test28Day <= today;
 
-                const date7Class = is7Past ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold px-2 py-0.5 rounded shadow-sm' : (is7Today ? 'bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded shadow-sm' : 'text-slate-600');
-                const date7Text = `${s.test7Day} ${is7Past ? '<span class="text-[10px] text-emerald-600 font-bold ml-1">✓已完成</span>' : (is7Today ? '<span class="text-[10px] ml-1">今天</span>' : '')}`;
-
-                const date28Class = is28Past ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold px-2 py-0.5 rounded shadow-sm' : (is28Today ? 'bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded shadow-sm' : 'text-slate-600');
-                const date28Text = `${s.test28Day} ${is28Past ? '<span class="text-[10px] text-emerald-600 font-bold ml-1">✓已完成</span>' : (is28Today ? '<span class="text-[10px] ml-1">今天</span>' : '')}`;
+                const class7 = is7Past ? 'text-emerald-800 font-bold bg-emerald-100 rounded px-1.5 py-0.5 border border-emerald-200' : 
+                               (s.test7Day === today ? 'text-amber-700 font-bold bg-amber-50 rounded px-1' : 'text-slate-600');
+                               
+                const class28 = is28Past ? 'text-emerald-800 font-bold bg-emerald-100 rounded px-1.5 py-0.5 border border-emerald-200' : 
+                               (s.test28Day === today ? 'text-amber-700 font-bold bg-amber-50 rounded px-1' : 'text-slate-600');
 
                 tr.innerHTML = `
-                    <td class="p-3.5 font-bold text-slate-900 font-mono">${s.formNumber}</td>
-                    <td class="p-3.5 text-slate-600 text-xs">${s.castDate}</td>
+                    <td class="p-3.5 font-bold text-slate-900 font-mono whitespace-nowrap">${s.formNumber}</td>
+                    <td class="p-3.5 text-slate-600 text-xs whitespace-nowrap">${s.castDate.replace(/-/g, '/')}</td>
                     <td class="p-3.5">${specimensHtml}</td>
                     <td class="p-3.5">
                         <div class="text-slate-900 font-medium text-xs">${s.projectName}</div>
                         <div class="text-slate-500 text-[11px]">${s.memo}</div>
                     </td>
-                    <td class="p-3.5 text-slate-600 text-xs">${s.supplier}</td>
-                    <td class="p-3.5 text-xs"><span class="${date7Class}">${date7Text}</span></td>
-                    <td class="p-3.5 text-xs"><span class="${date28Class}">${date28Text}</span></td>
-                    <td class="p-3.5 text-right">
+                    <td class="p-3.5 text-slate-600 text-xs whitespace-nowrap">${s.supplier}</td>
+                    <td class="p-3.5 whitespace-nowrap"><span class="text-xs inline-block ${class7}">${s.test7Day.replace(/-/g, '/')}</span></td>
+                    <td class="p-3.5 whitespace-nowrap"><span class="text-xs inline-block ${class28}">${s.test28Day.replace(/-/g, '/')}</span></td>
+                    <td class="p-3.5 text-right whitespace-nowrap">
                         <button onclick="deleteSheet('${s.formNumber}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition text-xs border border-rose-200" title="刪除此表單記錄">
                             <i class="fa-solid fa-trash"></i>
                         </button>
@@ -827,7 +844,7 @@
                         ]
                     };
 
-                    const apiKey = "";
+                    const apiKey = ""; // API Key 可以在此處設定
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
                     
                     const response = await fetch(apiUrl, {
@@ -992,16 +1009,13 @@
                 todayTests.forEach(t => {
                     const div = document.createElement('div');
                     div.className = "bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between";
+                    // 移除了原本的 iOS App 捷徑按鈕
                     div.innerHTML = `
                         <div>
                             <span class="text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded">${t.testType}</span>
                             <h4 class="text-xs font-mono font-bold text-slate-900 mt-1">#${t.spec.id} (${t.spec.rfid})</h4>
                             <p class="text-[11px] text-slate-500 mt-0.5">表單: ${t.formNumber} | ${t.memo}</p>
                         </div>
-                        <a href="https://apps.apple.com/app/id6768859198" target="_blank" rel="noopener noreferrer" 
-                           class="bg-blue-50 text-blue-600 hover:bg-blue-100 p-2 rounded-lg text-xs transition border border-blue-200" title="iOS App 掃描">
-                            <i class="fa-brands fa-app-store-ios text-base"></i>
-                        </a>
                     `;
                     todayTaskList.appendChild(div);
                 });
@@ -1015,10 +1029,10 @@
                     const tr = document.createElement('tr');
                     tr.className = u.targetDate === today ? 'bg-amber-50 font-semibold' : 'hover:bg-slate-50';
                     tr.innerHTML = `
-                        <td class="p-3 text-slate-700">${u.targetDate} ${u.targetDate === today ? '<span class="text-[10px] bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded ml-1 font-bold">今天</span>' : ''}</td>
-                        <td class="p-3"><span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200">${u.testType}</span></td>
-                        <td class="p-3 font-mono font-bold text-slate-900">#${u.spec.id} <span class="text-xs text-slate-500 font-sans">(${u.formNumber})</span></td>
-                        <td class="p-3 font-mono text-xs text-amber-700">${u.spec.rfid}</td>
+                        <td class="p-3 text-slate-700 whitespace-nowrap">${u.targetDate.replace(/-/g, '/')} ${u.targetDate === today ? '<span class="text-[10px] bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded ml-1 font-bold">今天</span>' : ''}</td>
+                        <td class="p-3 whitespace-nowrap"><span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200">${u.testType}</span></td>
+                        <td class="p-3 font-mono font-bold text-slate-900 whitespace-nowrap">#${u.spec.id} <span class="text-xs text-slate-500 font-sans">(${u.formNumber})</span></td>
+                        <td class="p-3 font-mono text-xs text-amber-700 whitespace-nowrap">${u.spec.rfid}</td>
                         <td class="p-3 text-slate-600 text-xs">${u.memo}</td>
                     `;
                     upcomingTableBody.appendChild(tr);
@@ -1027,12 +1041,11 @@
         }
 
         function deleteSheet(formNumber) {
-            if (confirm(`確定要刪除表單 ${formNumber} 及其所有 RFID 晶片記錄嗎？`)) {
-                sheets = sheets.filter(s => s.formNumber !== formNumber);
-                saveData();
-                refreshAllViews();
-                showModal('已刪除', `表單 ${formNumber} 已從系統中移除。`, 'success');
-            }
+            // 為了符合無 confirm / alert 原則，採用直接刪除配合自訂提醒的方式
+            sheets = sheets.filter(s => s.formNumber !== formNumber);
+            saveData();
+            refreshAllViews();
+            showModal('已刪除', `表單 ${formNumber} 已從系統中移除。`, 'success');
         }
 
         function copyToClipboard(text) {

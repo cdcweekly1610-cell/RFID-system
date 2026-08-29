@@ -111,7 +111,7 @@
             <div class="bg-gradient-to-br from-amber-500 to-amber-600 text-slate-950 rounded-2xl p-5 shadow-md flex flex-col justify-between">
                 <div class="flex justify-between items-start">
                     <div>
-                        <span class="text-xs font-semibold uppercase tracking-wider bg-amber-700/20 text-slate-950 px-2.5 py-1 rounded-lg">實驗室試壓任務提醒</span>
+                        <span id="alertCardLabel" class="text-xs font-semibold uppercase tracking-wider bg-amber-700/20 text-slate-950 px-2.5 py-1 rounded-lg">下次會驗</span>
                         <h2 id="todayReminderTitle" class="text-xl font-bold mt-2">今日無排定試體試壓</h2>
                     </div>
                     <i class="fa-solid fa-bell text-2xl text-amber-950/60"></i>
@@ -599,13 +599,12 @@
                     const count = s.specimens.length;
                     totalUsed += count;
                     
-                    const half = Math.floor(count / 2);
-                    // 根據目前日期判斷是否已達/超過試驗日
+                    // 根據目前日期判斷是否已達/超過試驗日 (7天 1顆，28天剩下的 3顆)
                     if (todayStr >= s.test28Day) {
-                        totalTested += count;
+                        totalTested += count;          // 4 顆全驗完
                     } else if (todayStr >= s.test7Day) {
-                        totalTested += half;           // 過了7天試驗日，假設一半的試體已試壓
-                        totalUntested += (count - half);
+                        totalTested += 1;              // 剛過 7 天只驗 1 顆
+                        totalUntested += (count - 1);  // 剩下 3 顆尚未驗
                     } else {
                         totalUntested += count;        // 皆尚未試壓
                     }
@@ -620,25 +619,43 @@
             if(testedElem) testedElem.innerText = totalTested;
             if(untestedElem) untestedElem.innerText = totalUntested;
 
+            // 尋找下次會驗日期與資料
             const today = getTodayString();
-            let todayTests = [];
+            let futureTests = [];
+            
             sheets.forEach(s => {
-                if(s.test7Day === today || s.test28Day === today) {
-                    s.specimens.forEach(spec => {
-                        todayTests.push({ ...s, testType: s.test7Day === today ? '7天試壓日' : '28天試壓日', spec });
-                    });
-                }
+                if (s.test7Day >= today) futureTests.push({ date: s.test7Day, type: '7d', form: s.formNumber });
+                if (s.test28Day >= today) futureTests.push({ date: s.test28Day, type: '28d', form: s.formNumber });
             });
+
+            let nextDate = null;
+            let nextTests = [];
+            let expectedSpecimenCount = 0;
+
+            if (futureTests.length > 0) {
+                // 將未來的測試依日期排序，找出最近的一天
+                futureTests.sort((a, b) => a.date.localeCompare(b.date));
+                nextDate = futureTests[0].date;
+                nextTests = futureTests.filter(t => t.date === nextDate);
+                
+                // 預計測試顆數計算：如果是 7 天試驗算 1 顆，28 天試驗算 3 顆
+                expectedSpecimenCount = nextTests.reduce((acc, curr) => acc + (curr.type === '7d' ? 1 : 3), 0);
+            }
 
             const titleElem = document.getElementById('todayReminderTitle');
             const descElem = document.getElementById('todayCountDesc');
+            const labelElem = document.getElementById('alertCardLabel');
+            
             if(titleElem && descElem) {
-                if(todayTests.length > 0) {
-                    titleElem.innerText = `今日有 ${todayTests.length} 顆 RFID 試體須試壓！`;
-                    descElem.innerText = `今日待測試體: ${todayTests.length} 組`;
+                if (nextDate) {
+                    const isToday = nextDate === today;
+                    if(labelElem) labelElem.innerText = isToday ? '今日會驗' : '下次會驗';
+                    titleElem.innerText = `${nextDate.replace(/-/g, '/')} (${nextTests.length} 組表單)`;
+                    descElem.innerText = `預計測試: ${expectedSpecimenCount} 顆`;
                 } else {
-                    titleElem.innerText = `今日無排定試體試壓`;
-                    descElem.innerText = `今日待測試體: 0 組`;
+                    if(labelElem) labelElem.innerText = '近期會驗狀態';
+                    titleElem.innerText = `近期無待會驗項目`;
+                    descElem.innerText = ``;
                 }
             }
         }
@@ -665,35 +682,63 @@
                 return;
             }
 
-            const today = getTodayString();
+            const todayStr = getTodayString();
+            const todayObj = new Date(todayStr);
+
+            // 輔助函式：計算目標日期距離今天還有幾天
+            const getDaysRemaining = (targetDateStr) => {
+                const targetObj = new Date(targetDateStr);
+                const diffTime = targetObj - todayObj;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays;
+            };
 
             filteredSheets.forEach(s => {
-                const is7Today = s.test7Day === today;
-                const is28Today = s.test28Day === today;
-                const is7Past = s.test7Day < today;
-                const is28Past = s.test28Day < today;
+                const is7Past = s.test7Day < todayStr;
+                const is28Past = s.test28Day < todayStr;
+                
+                const days7 = getDaysRemaining(s.test7Day);
+                const days28 = getDaysRemaining(s.test28Day);
 
-                const class7 = is7Past ? 'bg-emerald-100 text-emerald-800 border-emerald-200 font-bold' : 
-                               (is7Today ? 'bg-amber-500 text-slate-950 border-amber-500 font-bold' : 'bg-white text-slate-600 border-slate-200');
+                // 判斷 7 天與 28 天是否為「即將到來 (0-3 天內)」
+                const is7Approaching = days7 >= 0 && days7 <= 3;
+                const is28Approaching = days28 >= 0 && days28 <= 3;
+
+                // 產生 7 天試壓日的顯示字串與樣式
+                let class7 = 'bg-white text-slate-600 border-slate-200';
+                let text7 = `7d: ${s.test7Day.replace(/-/g, '/')}`;
+                if (is7Past) {
+                    class7 = 'bg-emerald-100 text-emerald-800 border-emerald-200 font-bold';
+                } else if (is7Approaching) {
+                    class7 = 'bg-rose-50 text-rose-700 border-rose-200 font-bold';
+                    text7 += days7 === 0 ? ' (就在今天)' : ` (還有 ${days7} 天)`;
+                }
                                
-                const class28 = is28Past ? 'bg-emerald-100 text-emerald-800 border-emerald-200 font-bold' : 
-                               (is28Today ? 'bg-amber-500 text-slate-950 border-amber-500 font-bold' : 'bg-white text-slate-600 border-slate-200');
+                // 產生 28 天試壓日的顯示字串與樣式
+                let class28 = 'bg-white text-slate-600 border-slate-200';
+                let text28 = `28d: ${s.test28Day.replace(/-/g, '/')}`;
+                if (is28Past) {
+                    class28 = 'bg-emerald-100 text-emerald-800 border-emerald-200 font-bold';
+                } else if (is28Approaching) {
+                    class28 = 'bg-rose-50 text-rose-700 border-rose-200 font-bold';
+                    text28 += days28 === 0 ? ' (就在今天)' : ` (還有 ${days28} 天)`;
+                }
 
                 const castDateOnly = s.castDate.split(' ')[0];
 
                 const card = document.createElement('div');
                 card.className = "bg-slate-50 border border-slate-200 hover:border-amber-400 rounded-2xl p-5 shadow-sm flex flex-col justify-between transition group";
                 
-                // 產生 4 顆 RFID 晶片的小方塊列表
+                // 產生 4 顆 RFID 晶片的小方塊列表 (加上 cursor-pointer 與 onClick 事件跳轉)
                 let rfidHtml = s.specimens.map(sp => `
-                    <div class="bg-white border border-slate-200 rounded-xl p-2.5 group-hover:border-amber-300 transition shadow-sm flex items-center justify-between">
+                    <div onclick="jumpToTable('${s.formNumber}')" class="cursor-pointer bg-white border border-slate-200 rounded-xl p-2.5 hover:border-amber-400 transition shadow-sm flex items-center justify-between" title="點擊跳轉至總表檢視此表單">
                         <div class="flex items-center gap-2 overflow-hidden">
                             <span class="text-[10px] font-mono bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded font-bold shrink-0">
                                 #${sp.id}
                             </span>
                             <span class="font-mono text-[11px] sm:text-xs text-slate-800 font-bold truncate" title="${sp.rfid}">${sp.rfid}</span>
                         </div>
-                        <button onclick="copyToClipboard('${sp.rfid}')" class="text-slate-400 hover:text-slate-800 p-1.5 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs transition shrink-0 ml-2 border border-slate-100" title="複製 RFID">
+                        <button onclick="event.stopPropagation(); copyToClipboard('${sp.rfid}')" class="text-slate-400 hover:text-slate-800 p-1.5 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs transition shrink-0 ml-2 border border-slate-100" title="複製 RFID">
                             <i class="fa-solid fa-copy"></i>
                         </button>
                     </div>
@@ -711,9 +756,9 @@
                         </div>
                         
                         <div class="space-y-1.5 text-xs text-slate-600 mb-4">
-                            <div class="flex justify-between">
-                                <span class="text-slate-400">專案/部位:</span>
-                                <span class="font-medium text-slate-800 truncate max-w-[250px] text-right" title="${s.projectName} - ${s.memo}">${s.projectName} <span class="text-slate-300 mx-0.5">|</span> ${s.memo}</span>
+                            <div class="flex justify-between items-start gap-2">
+                                <span class="text-slate-400 shrink-0">專案/部位:</span>
+                                <span class="font-medium text-slate-800 text-right" title="${s.projectName} - ${s.memo}">${s.projectName} <span class="text-slate-300 mx-0.5">|</span> ${s.memo}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-slate-400">設計強度:</span>
@@ -721,18 +766,10 @@
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <span class="text-[10px] text-slate-400 uppercase tracking-wider block mb-2 font-semibold">綁定 RFID 晶片列表 (共 ${s.specimens.length} 顆)</span>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                ${rfidHtml}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="pt-3 border-t border-slate-200 flex items-center justify-between text-xs">
-                        <div class="space-x-1 flex gap-1">
-                            <span class="border px-2 py-1 rounded-md shadow-sm inline-block whitespace-nowrap ${class7}" title="第 7 天試壓日">7d: ${s.test7Day.replace(/-/g, '/')}</span>
-                            <span class="border px-2 py-1 rounded-md shadow-sm inline-block whitespace-nowrap ${class28}" title="第 28 天試壓日">28d: ${s.test28Day.replace(/-/g, '/')}</span>
+                    <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs gap-2">
+                        <div class="space-x-1 flex flex-wrap gap-1">
+                            <span class="border px-2 py-1 rounded-md shadow-sm inline-block whitespace-nowrap ${class7}" title="第 7 天試壓日">${text7}</span>
+                            <span class="border px-2 py-1 rounded-md shadow-sm inline-block whitespace-nowrap ${class28}" title="第 28 天試壓日">${text28}</span>
                         </div>
                     </div>
                 `;
@@ -805,6 +842,26 @@
             } else {
                 if(emptyState) emptyState.classList.add('hidden');
             }
+        }
+
+        function jumpToTable(formNumber) {
+            // 1. 切換至總表分頁
+            switchTab('query');
+            
+            // 2. 將搜尋框設定為該表單編號
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = formNumber;
+            }
+            
+            // 3. 確保過濾器設為「所有表單記錄」，避免因時間過濾導致找不到
+            const filterTypeElem = document.getElementById('filterDateType');
+            if (filterTypeElem) {
+                filterTypeElem.value = 'all';
+            }
+            
+            // 4. 重新渲染總表，此時畫面只會出現該表單的專屬列
+            renderTable();
         }
 
         async function handleImageUpload(event) {

@@ -431,6 +431,7 @@
                 strength: '210',
                 test7Day: '2026-09-01',
                 test28Day: '2026-09-22',
+                specimen7DayId: null, // 新增：用於記錄被指定為 7 天試驗的試體 ID
                 specimens: [
                     { id: '1', rfid: 'RE280117020000128ECB80B25' },
                     { id: '2', rfid: 'RE2801170200001138ECB80B25' },
@@ -447,6 +448,7 @@
                 strength: '210',
                 test7Day: '2026-08-06',
                 test28Day: '2026-08-27',
+                specimen7DayId: null, // 新增
                 specimens: [
                     { id: '1', rfid: 'RE280117020001548ECB20B25' },
                     { id: '2', rfid: 'RE280117020000558ECB20B25' },
@@ -463,6 +465,7 @@
                 strength: '210',
                 test7Day: '2026-08-11',
                 test28Day: '2026-09-01',
+                specimen7DayId: null, // 新增
                 specimens: [
                     { id: '1', rfid: 'RE280117020000325ECAF0B25' },
                     { id: '2', rfid: 'RE280117020000315ECAF0B25' },
@@ -479,6 +482,7 @@
                 strength: '210',
                 test7Day: '2026-08-14',
                 test28Day: '2026-09-04',
+                specimen7DayId: null, // 新增
                 specimens: [
                     { id: '1', rfid: 'RE280117020000598ECB20B25' },
                     { id: '2', rfid: 'RE2801170200015B8ECB20B25' },
@@ -495,6 +499,7 @@
                 strength: '210',
                 test7Day: '2026-08-20',
                 test28Day: '2026-09-10',
+                specimen7DayId: null, // 新增
                 specimens: [
                     { id: '1', rfid: 'RE2801170200015D8ECB20B25' },
                     { id: '2', rfid: 'RE2801170200015E8ECB20B25' },
@@ -538,6 +543,87 @@
             const day = String(d.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         }
+
+        // --- Drag and Drop Variables ---
+        let draggedSpecimenId = null;
+        let draggedFormNumber = null;
+
+        function handleDragStart(e, formNumber, specId) {
+            draggedSpecimenId = specId;
+            draggedFormNumber = formNumber;
+            e.dataTransfer.effectAllowed = 'move';
+            // Store data as JSON string for easy parsing on drop
+            e.dataTransfer.setData('application/json', JSON.stringify({ formNumber, specId }));
+            e.target.classList.add('opacity-50'); // visual feedback
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('opacity-50');
+            draggedSpecimenId = null;
+            draggedFormNumber = null;
+            // Remove hover effect from all drop zones
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.classList.remove('border-amber-500', 'bg-amber-50');
+            });
+        }
+
+        function handleDragOver(e, targetFormNumber) {
+            e.preventDefault(); // Necessary to allow dropping
+            e.dataTransfer.dropEffect = 'move';
+            
+            // Only allow dropping if it's from the SAME form
+            if (draggedFormNumber === targetFormNumber) {
+                const dropZone = e.currentTarget;
+                dropZone.classList.add('border-amber-500', 'bg-amber-50');
+            }
+        }
+
+        function handleDragLeave(e) {
+            const dropZone = e.currentTarget;
+            dropZone.classList.remove('border-amber-500', 'bg-amber-50');
+        }
+
+        function handleDrop(e, targetFormNumber) {
+            e.preventDefault();
+            const dropZone = e.currentTarget;
+            dropZone.classList.remove('border-amber-500', 'bg-amber-50');
+
+            try {
+                const data = JSON.parse(e.dataTransfer.getData('application/json'));
+                const formNumber = data.formNumber;
+                const specId = data.specId;
+
+                // Ensure dropping only within the same form's card
+                if (formNumber === targetFormNumber) {
+                    const sheetIndex = sheets.findIndex(s => s.formNumber === targetFormNumber);
+                    if (sheetIndex !== -1) {
+                        // Update the data model
+                        sheets[sheetIndex].specimen7DayId = specId;
+                        saveData();
+                        // Re-render the specific grid to show the change
+                        renderRfidFocusGrid();
+                        renderTable();
+                        showModal('設定成功', `已將試體 #${specId} 指定為 7 天試壓項目。`, 'success');
+                    }
+                } else {
+                     showModal('操作錯誤', '只能從相同表單中拖曳試體來設定 7 天試壓項目。', 'warning');
+                }
+            } catch (err) {
+                console.error("Drop handling error:", err);
+            }
+        }
+
+        function remove7DayAssignment(formNumber, event) {
+            event.stopPropagation(); // Prevent triggering other click events if any
+            const sheetIndex = sheets.findIndex(s => s.formNumber === formNumber);
+            if (sheetIndex !== -1) {
+                sheets[sheetIndex].specimen7DayId = null;
+                saveData();
+                renderRfidFocusGrid();
+                renderTable();
+            }
+        }
+        // -----------------------------
 
         window.onload = function() {
             loadData();
@@ -725,14 +811,26 @@
                 }
 
                 const castDateOnly = s.castDate.split(' ')[0];
+                
+                // Identify which specimen is assigned to 7 days
+                const assigned7DaySpecimen = s.specimens.find(sp => sp.id === s.specimen7DayId);
 
                 const card = document.createElement('div');
                 card.className = "bg-slate-50 border border-slate-200 hover:border-amber-400 rounded-2xl p-5 shadow-sm flex flex-col justify-between transition group";
                 
                 // 產生 4 顆 RFID 晶片的小方塊列表 (加上 cursor-pointer 與 onClick 事件跳轉)
-                let rfidHtml = s.specimens.map(sp => `
-                    <div onclick="jumpToTable('${s.formNumber}')" class="cursor-pointer bg-white border border-slate-200 rounded-xl p-2.5 hover:border-amber-400 transition shadow-sm flex items-center justify-between" title="點擊跳轉至總表檢視此表單">
-                        <div class="flex items-center gap-2 overflow-hidden">
+                // ADDED draggable attributes and event listeners
+                let rfidHtml = s.specimens.map(sp => {
+                    // Don't render it in the grid if it's assigned to the drop zone, unless you want it duplicated
+                    const isAssigned = sp.id === s.specimen7DayId;
+                    const opacityClass = isAssigned ? 'opacity-40 grayscale cursor-not-allowed' : 'cursor-grab active:cursor-grabbing hover:border-amber-400';
+                    
+                    return `
+                    <div ${!isAssigned ? `draggable="true" ondragstart="handleDragStart(event, '${s.formNumber}', '${sp.id}')" ondragend="handleDragEnd(event)"` : ''} 
+                         onclick="${!isAssigned ? `jumpToTable('${s.formNumber}')` : ''}" 
+                         class="${opacityClass} bg-white border border-slate-200 rounded-xl p-2.5 transition shadow-sm flex items-center justify-between" 
+                         title="${isAssigned ? '已指派為7天試體' : '拖曳至下方 7d 區域指定，或點擊跳轉至總表'}">
+                        <div class="flex items-center gap-2 overflow-hidden pointer-events-none">
                             <span class="text-[10px] font-mono bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded font-bold shrink-0">
                                 #${sp.id}
                             </span>
@@ -742,7 +840,36 @@
                             <i class="fa-solid fa-copy"></i>
                         </button>
                     </div>
-                `).join('');
+                `}).join('');
+
+                // Generate Drop Zone HTML
+                let dropZoneHtml = '';
+                if (assigned7DaySpecimen) {
+                    // State when a specimen is assigned
+                    dropZoneHtml = `
+                        <div class="flex items-center gap-2 bg-emerald-50 border-2 border-emerald-300 rounded-lg px-2 py-1 shadow-inner relative group/zone transition-all min-w-[120px]">
+                            <span class="text-[10px] font-mono bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded font-bold shrink-0">
+                                #${assigned7DaySpecimen.id}
+                            </span>
+                            <span class="font-mono text-[10px] text-emerald-900 font-semibold truncate" title="${assigned7DaySpecimen.rfid}">${assigned7DaySpecimen.rfid.substring(0,8)}...</span>
+                            <button onclick="remove7DayAssignment('${s.formNumber}', event)" class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover/zone:opacity-100 transition-opacity hover:bg-rose-600 shadow" title="移除設定">
+                                <i class="fa-solid fa-times text-[10px]"></i>
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    // State when empty and waiting for drop
+                    dropZoneHtml = `
+                        <div class="drop-zone flex items-center justify-center gap-1 border-2 border-dashed border-slate-300 rounded-lg px-3 py-1 bg-slate-100 text-slate-400 min-w-[120px] transition-colors"
+                             ondragover="handleDragOver(event, '${s.formNumber}')"
+                             ondragleave="handleDragLeave(event)"
+                             ondrop="handleDrop(event, '${s.formNumber}')">
+                            <i class="fa-solid fa-arrow-down text-[10px]"></i>
+                            <span class="text-[10px] font-semibold">拖曳至此指定</span>
+                        </div>
+                    `;
+                }
+
 
                 card.innerHTML = `
                     <div>
@@ -773,9 +900,16 @@
                     </div>
 
                     <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs gap-2">
-                        <div class="space-x-1 flex flex-wrap gap-1">
-                            <span class="border px-2 py-1 rounded-md shadow-sm inline-block whitespace-nowrap ${class7}" title="第 7 天試壓日">${text7}</span>
-                            <span class="border px-2 py-1 rounded-md shadow-sm inline-block whitespace-nowrap ${class28}" title="第 28 天試壓日">${text28}</span>
+                        <div class="flex items-center flex-wrap gap-2 w-full sm:w-auto">
+                            <!-- 7d container with Drop Zone -->
+                            <div class="flex items-center gap-2 p-1.5 bg-slate-100/50 rounded-xl border border-slate-100">
+                                <span class="border px-2 py-1 rounded-md shadow-sm inline-block whitespace-nowrap ${class7}" title="第 7 天試壓日">${text7}</span>
+                                ${dropZoneHtml}
+                            </div>
+                            <!-- 28d container -->
+                            <div class="p-1.5">
+                                <span class="border px-2 py-1 rounded-md shadow-sm inline-block whitespace-nowrap ${class28}" title="第 28 天試壓日">${text28}</span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -812,9 +946,17 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
                 
-                let specimensHtml = s.specimens.map(sp => 
-                    `<div class="font-mono text-xs py-0.5 flex items-center gap-2"><span class="text-amber-600 font-bold">[#${sp.id}]</span> <span class="text-slate-700">${sp.rfid}</span></div>`
-                ).join('');
+                let specimensHtml = s.specimens.map(sp => {
+                    const is7Day = sp.id === s.specimen7DayId;
+                    const badgeClass = is7Day ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'text-amber-600 bg-amber-50/50 border-transparent';
+                    const textClass = is7Day ? 'text-emerald-900 font-semibold' : 'text-slate-700';
+                    const label = is7Day ? '<span class="ml-1 text-[10px] bg-emerald-500 text-white px-1 py-0.5 rounded leading-none">7D</span>' : '';
+                    
+                    return `<div class="font-mono text-xs py-0.5 flex items-center gap-2">
+                                <span class="font-bold px-1 rounded border ${badgeClass}">[#${sp.id}]</span> 
+                                <span class="${textClass}">${sp.rfid}</span>${label}
+                            </div>`;
+                }).join('');
 
                 // 判斷日期是否已過 (小於今天為綠色，等於今天為橘色)
                 const is7Past = s.test7Day < today;
@@ -1027,6 +1169,7 @@
                 strength,
                 test7Day: d7.toISOString().split('T')[0],
                 test28Day: d28.toISOString().split('T')[0],
+                specimen7DayId: null, // 新增：預設為空
                 specimens: [
                     { id: '1', rfid: r1 },
                     { id: '2', rfid: r2 },

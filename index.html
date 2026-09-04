@@ -2,7 +2,7 @@
 <html lang="zh-TW" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scal e=1.0">
     <title>混凝土試體 RFID 智慧管理與實驗室排程系統</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -48,7 +48,7 @@
                     <span class="sm:hidden">載入表單</span>
                 </button>
                 
-                <!-- 新增：Notion 頁面連結按鈕 -->
+                <!-- Notion 頁面連結按鈕 -->
                 <a href="https://app.notion.com/p/b4774dce1b6a83a9baf001fff28e04d4?v=3ac74dce1b6a80589aba000c4e94de41&source=copy_link" target="_blank" rel="noopener noreferrer" 
                     class="bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold px-3.5 py-2 rounded-xl transition flex items-center space-x-2 shadow-sm">
                     <svg class="w-4 h-4 text-slate-700" viewBox="0 0 24 24" fill="currentColor">
@@ -64,7 +64,6 @@
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
         
         <!-- Top Metrics & RFID Focus Stats -->
-        <!-- 修改為 2 欄版面 (原為 3 欄) -->
         <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- RFID Active Badge Card -->
             <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-hidden">
@@ -84,7 +83,7 @@
                         </div>
                         <!-- 已使用 -->
                         <div class="bg-blue-50 border border-blue-200 rounded-xl p-2.5 flex flex-col items-center justify-center shadow-sm">
-                            <span class="text-[11px] text-blue-700 font-semibold mb-0.5">已使用</span>
+                            <span class="text-[11px] text-blue-700 font-semibold mb-0.5">已綁定表單</span>
                             <span id="usedRfidCount" class="text-xl font-bold text-blue-800 font-mono">0</span>
                         </div>
                         <!-- 已試驗 -->
@@ -112,17 +111,15 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <span id="alertCardLabel" class="text-xs font-semibold uppercase tracking-wider bg-amber-700/20 text-slate-950 px-2.5 py-1 rounded-lg">下次會驗</span>
-                        <h2 id="todayReminderTitle" class="text-xl font-bold mt-2">今日無排定試體試壓</h2>
+                        <h2 id="todayReminderTitle" class="text-xl font-bold mt-2">目前無排定試體試壓</h2>
                     </div>
                     <i class="fa-solid fa-bell text-2xl text-amber-950/60"></i>
                 </div>
                 <div class="mt-4 flex items-center justify-between text-sm">
-                    <span id="todayCountDesc" class="font-bold">今日待測試體: 0 組</span>
+                    <span id="todayCountDesc" class="font-bold">待測試體: 0 組</span>
                     <button onclick="switchTab('schedule')" class="bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-slate-800 transition shadow">查看實驗室排程</button>
                 </div>
             </div>
-            
-            <!-- 移除了原本的 iOS 掃描 App 快速卡片 -->
         </section>
 
         <!-- Navigation Tabs -->
@@ -239,6 +236,21 @@
                     </div>
                 </div>
 
+                <!-- API Key Setting Box -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-sm font-bold text-amber-900 flex items-center gap-2">
+                            <i class="fa-solid fa-key"></i> Gemini API 金鑰設定
+                        </h3>
+                        <p class="text-xs text-amber-700 mt-1">請填寫您的 API Key 以啟用圖片解析。金鑰僅安全儲存於您的瀏覽器本機中。</p>
+                    </div>
+                    <div class="w-full md:w-auto flex-1 max-w-md relative">
+                        <i class="fa-solid fa-lock absolute left-3 top-3 text-amber-500/50 text-xs"></i>
+                        <input type="password" id="apiKeyInput" value="AQ.Ab8RN6K_cPtAmAZQaPxDVMyAKvtCbO-8x-gnXJzqBELRGXeGEQ" placeholder="請貼上您的 API Key (如 AIzaSy...)" onchange="saveApiKey()" 
+                            class="w-full bg-white border border-amber-300 rounded-xl pl-8 pr-4 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-sm font-mono">
+                    </div>
+                </div>
+
                 <!-- AI Photo Upload Box -->
                 <div class="bg-slate-50 border-2 border-dashed border-slate-300 hover:border-amber-400 rounded-2xl p-6 text-center mb-6 transition relative">
                     <input type="file" id="ocrPhotoInput" accept="image/*" onchange="handleImageUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
@@ -300,29 +312,40 @@
                         </label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             <div>
-                                <span class="text-[11px] text-slate-500 block mb-1">試體 #1 RFID 晶片碼</span>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <input type="checkbox" id="hasSpecimen1" checked onchange="toggleSpecimen(1)" class="w-3.5 h-3.5 text-amber-500 border-slate-300 rounded focus:ring-amber-500 cursor-pointer">
+                                    <label for="hasSpecimen1" class="text-[11px] text-slate-600 cursor-pointer select-none">試體 #1 RFID 晶片碼</label>
+                                </div>
                                 <input type="text" id="rfid1" required placeholder="RE280117020000..." 
-                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono">
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed">
                             </div>
                             <div>
-                                <span class="text-[11px] text-slate-500 block mb-1">試體 #2 RFID 晶片碼</span>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <input type="checkbox" id="hasSpecimen2" checked onchange="toggleSpecimen(2)" class="w-3.5 h-3.5 text-amber-500 border-slate-300 rounded focus:ring-amber-500 cursor-pointer">
+                                    <label for="hasSpecimen2" class="text-[11px] text-slate-600 cursor-pointer select-none">試體 #2 RFID 晶片碼</label>
+                                </div>
                                 <input type="text" id="rfid2" required placeholder="RE280117020000..." 
-                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono">
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed">
                             </div>
                             <div>
-                                <span class="text-[11px] text-slate-500 block mb-1">試體 #3 RFID 晶片碼</span>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <input type="checkbox" id="hasSpecimen3" checked onchange="toggleSpecimen(3)" class="w-3.5 h-3.5 text-amber-500 border-slate-300 rounded focus:ring-amber-500 cursor-pointer">
+                                    <label for="hasSpecimen3" class="text-[11px] text-slate-600 cursor-pointer select-none">試體 #3 RFID 晶片碼</label>
+                                </div>
                                 <input type="text" id="rfid3" required placeholder="RE280117020000..." 
-                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono">
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed">
                             </div>
                             <div>
-                                <span class="text-[11px] text-slate-500 block mb-1">試體 #4 RFID 晶片碼</span>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <input type="checkbox" id="hasSpecimen4" checked onchange="toggleSpecimen(4)" class="w-3.5 h-3.5 text-amber-500 border-slate-300 rounded focus:ring-amber-500 cursor-pointer">
+                                    <label for="hasSpecimen4" class="text-[11px] text-slate-600 cursor-pointer select-none">試體 #4 RFID 晶片碼</label>
+                                </div>
                                 <input type="text" id="rfid4" required placeholder="RE280117020000..." 
-                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono">
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed">
                             </div>
                         </div>
                     </div>
 
-                    <!-- Computed Date Preview Box (Removed iOS Link) -->
                     <div class="sm:col-span-2 lg:col-span-3 bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-col justify-center gap-3">
                         <div class="text-xs text-blue-900">
                             <span class="font-bold block mb-0.5"><i class="fa-solid fa-calculator mr-1"></i> 實驗室試壓行程自動試算：</span>
@@ -372,7 +395,6 @@
                             </div>
                         </div>
                         <div class="mt-4 pt-3 border-t border-slate-200 text-center">
-                            <!-- 已移除 iOS 手持裝置文字 -->
                             <p class="text-[11px] text-slate-500"><i class="fa-solid fa-info-circle mr-1"></i> 請確實進行實驗室接收與試壓確認。</p>
                         </div>
                     </div>
@@ -420,6 +442,7 @@
     <!-- JavaScript Application Logic -->
     <script>
         const STORAGE_KEY = 'concrete_rfid_master_v5';
+        const API_KEY_STORAGE = 'gemini_api_key_v1';
 
         const masterSheets = [
             {
@@ -431,7 +454,7 @@
                 strength: '210',
                 test7Day: '2026-09-01',
                 test28Day: '2026-09-22',
-                specimen7DayId: null, // 新增：用於記錄被指定為 7 天試驗的試體 ID
+                specimen7DayId: null,
                 specimens: [
                     { id: '1', rfid: 'RE280117020000128ECB80B25' },
                     { id: '2', rfid: 'RE2801170200001138ECB80B25' },
@@ -448,7 +471,7 @@
                 strength: '210',
                 test7Day: '2026-08-06',
                 test28Day: '2026-08-27',
-                specimen7DayId: null, // 新增
+                specimen7DayId: '2',
                 specimens: [
                     { id: '1', rfid: 'RE280117020001548ECB20B25' },
                     { id: '2', rfid: 'RE280117020000558ECB20B25' },
@@ -465,7 +488,7 @@
                 strength: '210',
                 test7Day: '2026-08-11',
                 test28Day: '2026-09-01',
-                specimen7DayId: null, // 新增
+                specimen7DayId: '1',
                 specimens: [
                     { id: '1', rfid: 'RE280117020000325ECAF0B25' },
                     { id: '2', rfid: 'RE280117020000315ECAF0B25' },
@@ -482,7 +505,7 @@
                 strength: '210',
                 test7Day: '2026-08-14',
                 test28Day: '2026-09-04',
-                specimen7DayId: null, // 新增
+                specimen7DayId: null,
                 specimens: [
                     { id: '1', rfid: 'RE280117020000598ECB20B25' },
                     { id: '2', rfid: 'RE2801170200015B8ECB20B25' },
@@ -499,7 +522,7 @@
                 strength: '210',
                 test7Day: '2026-08-20',
                 test28Day: '2026-09-10',
-                specimen7DayId: null, // 新增
+                specimen7DayId: '4',
                 specimens: [
                     { id: '1', rfid: 'RE2801170200015D8ECB20B25' },
                     { id: '2', rfid: 'RE2801170200015E8ECB20B25' },
@@ -510,6 +533,7 @@
         ];
 
         let sheets = [];
+        let draggedItem = null;
 
         function loadData() {
             const stored = localStorage.getItem(STORAGE_KEY);
@@ -529,11 +553,24 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(sheets));
         }
 
+        function saveApiKey() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if (key) {
+                localStorage.setItem(API_KEY_STORAGE, key);
+            } else {
+                localStorage.removeItem(API_KEY_STORAGE);
+            }
+        }
+
+        function getApiKey() {
+            return document.getElementById('apiKeyInput').value.trim() || localStorage.getItem(API_KEY_STORAGE);
+        }
+
         function loadAllRecordSheets() {
             sheets = JSON.parse(JSON.stringify(masterSheets));
             saveData();
             refreshAllViews();
-            showModal('載入成功', '已成功載入 5 張現場取樣記錄表，共 20 顆 RFID 晶片資料！', 'success');
+            showModal('載入成功', '已成功載入 5 張現場取樣記錄表！', 'success');
         }
 
         function getTodayString() {
@@ -544,89 +581,16 @@
             return `${year}-${month}-${day}`;
         }
 
-        // --- Drag and Drop Variables ---
-        let draggedSpecimenId = null;
-        let draggedFormNumber = null;
-
-        function handleDragStart(e, formNumber, specId) {
-            draggedSpecimenId = specId;
-            draggedFormNumber = formNumber;
-            e.dataTransfer.effectAllowed = 'move';
-            // Store data as JSON string for easy parsing on drop
-            e.dataTransfer.setData('application/json', JSON.stringify({ formNumber, specId }));
-            e.target.classList.add('opacity-50'); // visual feedback
-        }
-
-        function handleDragEnd(e) {
-            e.target.classList.remove('opacity-50');
-            draggedSpecimenId = null;
-            draggedFormNumber = null;
-            // Remove hover effect from all drop zones
-            document.querySelectorAll('.drop-zone').forEach(zone => {
-                zone.classList.remove('border-amber-500', 'bg-amber-50');
-            });
-        }
-
-        function handleDragOver(e, targetFormNumber) {
-            e.preventDefault(); // Necessary to allow dropping
-            e.dataTransfer.dropEffect = 'move';
-            
-            // Only allow dropping if it's from the SAME form
-            if (draggedFormNumber === targetFormNumber) {
-                const dropZone = e.currentTarget;
-                dropZone.classList.add('border-amber-500', 'bg-amber-50');
-            }
-        }
-
-        function handleDragLeave(e) {
-            const dropZone = e.currentTarget;
-            dropZone.classList.remove('border-amber-500', 'bg-amber-50');
-        }
-
-        function handleDrop(e, targetFormNumber) {
-            e.preventDefault();
-            const dropZone = e.currentTarget;
-            dropZone.classList.remove('border-amber-500', 'bg-amber-50');
-
-            try {
-                const data = JSON.parse(e.dataTransfer.getData('application/json'));
-                const formNumber = data.formNumber;
-                const specId = data.specId;
-
-                // Ensure dropping only within the same form's card
-                if (formNumber === targetFormNumber) {
-                    const sheetIndex = sheets.findIndex(s => s.formNumber === targetFormNumber);
-                    if (sheetIndex !== -1) {
-                        // Update the data model
-                        sheets[sheetIndex].specimen7DayId = specId;
-                        saveData();
-                        // Re-render the specific grid to show the change
-                        renderRfidFocusGrid();
-                        renderTable();
-                        showModal('設定成功', `已將試體 #${specId} 指定為 7 天試壓項目。`, 'success');
-                    }
-                } else {
-                     showModal('操作錯誤', '只能從相同表單中拖曳試體來設定 7 天試壓項目。', 'warning');
-                }
-            } catch (err) {
-                console.error("Drop handling error:", err);
-            }
-        }
-
-        function remove7DayAssignment(formNumber, event) {
-            event.stopPropagation(); // Prevent triggering other click events if any
-            const sheetIndex = sheets.findIndex(s => s.formNumber === formNumber);
-            if (sheetIndex !== -1) {
-                sheets[sheetIndex].specimen7DayId = null;
-                saveData();
-                renderRfidFocusGrid();
-                renderTable();
-            }
-        }
-        // -----------------------------
-
         window.onload = function() {
             loadData();
+            
+            // 載入儲存的 API Key
+            const savedKey = localStorage.getItem(API_KEY_STORAGE);
+            if (savedKey) {
+                const keyInput = document.getElementById('apiKeyInput');
+                if (keyInput) keyInput.value = savedKey;
+            }
+
             const castDateElem = document.getElementById('castDate');
             if(castDateElem) {
                 const now = new Date();
@@ -645,9 +609,9 @@
         };
 
         function refreshAllViews() {
-            // 自動將表單依「澆置時間」由近到遠(降冪)排序
-            sheets.sort((a, b) => b.castDate.localeCompare(a.castDate));
-
+            // 依澆置時間降冪排序
+            sheets.sort((a, b) => new Date(b.castDate) - new Date(a.castDate)); 
+            
             updateDashboardStats();
             renderRfidFocusGrid();
             renderTable();
@@ -665,7 +629,7 @@
                     btn.className = "px-4 py-2.5 text-sm font-semibold rounded-xl bg-amber-500 text-slate-950 transition flex items-center space-x-2 shadow-md shadow-amber-500/20 whitespace-nowrap";
                     content.classList.remove('hidden');
                 } else {
-                    btn.className = "px-4 py-2.5 text-sm font-semibold rounded-xl bg-white text-slate-600 hover:bg-slate-50 transition flex items-center space-x-2 border border-slate-200 shadow-sm whitespace-nowrap";
+                    btn.className = "px-4 py-2.5 text-sm font-semibold rounded-xl bg-white text-slate-600 hover:bg-slate-50 transition flex items-center space-x-2 border border-slate-200 whitespace-nowrap shadow-sm";
                     content.classList.add('hidden');
                 }
             });
@@ -675,75 +639,146 @@
         }
 
         function updateDashboardStats() {
-            let totalUsed = 0;
-            let totalTested = 0;
-            let totalUntested = 0;
-            const todayStr = getTodayString();
+            let totalRfid = 0;
+            let testedCount = 0;
+            let untestedCount = 0;
+            let usedFormCount = 0;
+            const today = getTodayString();
 
             sheets.forEach(s => {
-                if (s.specimens) {
+                if(s.specimens) {
                     const count = s.specimens.length;
-                    totalUsed += count;
+                    totalRfid += count;
+                    usedFormCount += count;
                     
-                    // 根據目前日期判斷是否已達/超過試驗日 (7天 1顆，28天剩下的 3顆)
-                    if (todayStr >= s.test28Day) {
-                        totalTested += count;          // 4 顆全驗完
-                    } else if (todayStr >= s.test7Day) {
-                        totalTested += 1;              // 剛過 7 天只驗 1 顆
-                        totalUntested += (count - 1);  // 剩下 3 顆尚未驗
+                    const is7DayPassed = s.test7Day <= today;
+                    const is28DayPassed = s.test28Day <= today;
+
+                    if (is28DayPassed) {
+                        testedCount += count;
+                    } else if (is7DayPassed && count >= 4) {
+                        testedCount += 1;
+                        untestedCount += (count - 1);
                     } else {
-                        totalUntested += count;        // 皆尚未試壓
+                        untestedCount += count;
                     }
                 }
             });
 
-            const usedElem = document.getElementById('usedRfidCount');
+            const totalElem = document.getElementById('usedRfidCount');
+            if(totalElem) totalElem.innerText = usedFormCount;
             const testedElem = document.getElementById('testedRfidCount');
+            if(testedElem) testedElem.innerText = testedCount;
             const untestedElem = document.getElementById('untestedRfidCount');
-
-            if(usedElem) usedElem.innerText = totalUsed;
-            if(testedElem) testedElem.innerText = totalTested;
-            if(untestedElem) untestedElem.innerText = totalUntested;
-
-            // 尋找下次會驗日期與資料
-            const today = getTodayString();
-            let futureTests = [];
-            
-            sheets.forEach(s => {
-                if (s.test7Day >= today) futureTests.push({ date: s.test7Day, type: '7d', form: s.formNumber });
-                if (s.test28Day >= today) futureTests.push({ date: s.test28Day, type: '28d', form: s.formNumber });
-            });
+            if(untestedElem) untestedElem.innerText = untestedCount;
 
             let nextDate = null;
-            let nextTests = [];
-            let expectedSpecimenCount = 0;
+            let targetForms = 0;
+            let targetSpecimens = 0;
 
-            if (futureTests.length > 0) {
-                // 將未來的測試依日期排序，找出最近的一天
-                futureTests.sort((a, b) => a.date.localeCompare(b.date));
-                nextDate = futureTests[0].date;
-                nextTests = futureTests.filter(t => t.date === nextDate);
+            const allDates = [];
+            sheets.forEach(s => {
+                if(s.test7Day >= today) allDates.push(s.test7Day);
+                if(s.test28Day >= today) allDates.push(s.test28Day);
+            });
+            
+            if(allDates.length > 0) {
+                allDates.sort();
+                nextDate = allDates[0];
                 
-                // 預計測試顆數計算：如果是 7 天試驗算 1 顆，28 天試驗算 3 顆
-                expectedSpecimenCount = nextTests.reduce((acc, curr) => acc + (curr.type === '7d' ? 1 : 3), 0);
+                sheets.forEach(s => {
+                    if(s.test7Day === nextDate && s.specimens.length >= 4) {
+                        targetForms++;
+                        targetSpecimens += 1;
+                    }
+                    if(s.test28Day === nextDate) {
+                        targetForms++;
+                        targetSpecimens += (s.specimens ? Math.max(0, s.specimens.length - 1) : 3);
+                    }
+                });
             }
 
             const titleElem = document.getElementById('todayReminderTitle');
             const descElem = document.getElementById('todayCountDesc');
-            const labelElem = document.getElementById('alertCardLabel');
-            
-            if(titleElem && descElem) {
-                if (nextDate) {
+            const alertCardLabel = document.getElementById('alertCardLabel');
+
+            if(titleElem && descElem && alertCardLabel) {
+                if(nextDate) {
                     const isToday = nextDate === today;
-                    if(labelElem) labelElem.innerText = isToday ? '今日會驗' : '下次會驗';
-                    titleElem.innerText = `${nextDate.replace(/-/g, '/')} (${nextTests.length} 組表單)`;
-                    descElem.innerText = `預計測試: ${expectedSpecimenCount} 顆`;
+                    alertCardLabel.innerText = isToday ? "今日會驗" : "下次會驗";
+                    alertCardLabel.className = isToday 
+                        ? "text-xs font-semibold uppercase tracking-wider bg-rose-500 text-white px-2.5 py-1 rounded-lg animate-pulse"
+                        : "text-xs font-semibold uppercase tracking-wider bg-amber-700/20 text-slate-950 px-2.5 py-1 rounded-lg";
+                    
+                    titleElem.innerText = isToday 
+                        ? `今日有 ${targetForms} 組表單待試壓！`
+                        : `預計 ${nextDate.replace(/-/g, '/')} 試壓`;
+                    descElem.innerText = `待測試體: ${targetSpecimens} 顆`;
                 } else {
-                    if(labelElem) labelElem.innerText = '近期會驗狀態';
-                    titleElem.innerText = `近期無待會驗項目`;
-                    descElem.innerText = ``;
+                    alertCardLabel.innerText = "會驗預告";
+                    alertCardLabel.className = "text-xs font-semibold uppercase tracking-wider bg-amber-700/20 text-slate-950 px-2.5 py-1 rounded-lg";
+                    titleElem.innerText = `目前無排定試體試壓`;
+                    descElem.innerText = `待測試體: 0 顆`;
                 }
             }
+        }
+
+        function handleDragStart(e, formNumber, specId) {
+            draggedItem = { formNumber, specId };
+            e.dataTransfer.setData('text/plain', JSON.stringify(draggedItem));
+            setTimeout(() => e.target.classList.add('opacity-50'), 0);
+        }
+        function handleDragEnd(e) {
+            e.target.classList.remove('opacity-50');
+            draggedItem = null;
+            document.querySelectorAll('.drop-zone').forEach(el => el.classList.remove('bg-amber-100', 'border-amber-400'));
+        }
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('bg-amber-100', 'border-amber-400');
+        }
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('bg-amber-100', 'border-amber-400');
+        }
+        function handleDrop(e, targetFormNumber) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('bg-amber-100', 'border-amber-400');
+            try {
+                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                if(data && data.formNumber === targetFormNumber) {
+                    const sheet = sheets.find(s => s.formNumber === targetFormNumber);
+                    if(sheet) {
+                        sheet.specimen7DayId = data.specId;
+                        saveData();
+                        refreshAllViews();
+                    }
+                } else {
+                    showModal('操作錯誤', '只能將同一表單內的晶片指定為該表單的 7 天試體！', 'warning');
+                }
+            } catch(err) {}
+        }
+        function clear7DaySpecimen(e, formNumber) {
+            e.stopPropagation();
+            const sheet = sheets.find(s => s.formNumber === formNumber);
+            if(sheet) {
+                sheet.specimen7DayId = null;
+                saveData();
+                refreshAllViews();
+            }
+        }
+
+        function jumpToTable(formNumber) {
+            switchTab('query');
+            const searchInput = document.getElementById('searchInput');
+            if(searchInput) {
+                searchInput.value = formNumber;
+                renderTable();
+            }
+        }
+
+        function copyRfid(e, text) {
+            e.stopPropagation();
+            copyToClipboard(text);
         }
 
         function renderRfidFocusGrid() {
@@ -753,163 +788,142 @@
 
             const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
             container.innerHTML = '';
+            const today = getTodayString();
+            const dToday = new Date(today);
 
-            // 改以「表單 (Sheet)」為單位進行過濾，只要表單編號、備註、專案或其中任何一顆 RFID 符合就顯示該大卡片
-            let filteredSheets = sheets.filter(s => {
-                const matchForm = s.formNumber.toLowerCase().includes(query);
-                const matchMemo = s.memo.toLowerCase().includes(query);
-                const matchProject = s.projectName.toLowerCase().includes(query);
-                const matchRfid = s.specimens.some(sp => sp.rfid.toLowerCase().includes(query));
-                return matchForm || matchMemo || matchProject || matchRfid;
+            const filteredSheets = sheets.filter(sheet => {
+                return sheet.formNumber.toLowerCase().includes(query) || 
+                       sheet.memo.toLowerCase().includes(query) ||
+                       sheet.specimens.some(sp => sp.rfid.toLowerCase().includes(query));
             });
 
             if(filteredSheets.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 text-sm">找不到符合的 RFID 晶片記錄</div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 text-sm">找不到符合的表單或晶片記錄</div>`;
                 return;
             }
 
-            const todayStr = getTodayString();
-            const todayObj = new Date(todayStr);
-
-            // 輔助函式：計算目標日期距離今天還有幾天
-            const getDaysRemaining = (targetDateStr) => {
-                const targetObj = new Date(targetDateStr);
-                const diffTime = targetObj - todayObj;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                return diffDays;
-            };
-
-            filteredSheets.forEach(s => {
-                const is7Past = s.test7Day < todayStr;
-                const is28Past = s.test28Day < todayStr;
+            filteredSheets.forEach(sheet => {
+                // 運算該表單四顆晶片的差異段，用以橘色高亮顯示
+                const rfidStrs = sheet.specimens.map(sp => sp.rfid);
+                let prefix = "";
+                let suffix = "";
                 
-                const days7 = getDaysRemaining(s.test7Day);
-                const days28 = getDaysRemaining(s.test28Day);
+                if (rfidStrs.length > 0) {
+                    let first = rfidStrs[0];
+                    let pLen = 0;
+                    while (pLen < first.length && rfidStrs.every(s => s[pLen] === first[pLen])) pLen++;
+                    prefix = first.substring(0, pLen);
 
-                // 判斷 7 天與 28 天是否為「即將到來 (0-3 天內)」
-                const is7Approaching = days7 >= 0 && days7 <= 3;
-                const is28Approaching = days28 >= 0 && days28 <= 3;
-
-                // 產生 7 天試壓日的顯示字串與樣式
-                let class7 = 'bg-white text-slate-600 border-slate-200';
-                let text7 = `7d: ${s.test7Day.replace(/-/g, '/')}`;
-                if (is7Past) {
-                    class7 = 'bg-emerald-100 text-emerald-800 border-emerald-200 font-bold';
-                } else if (is7Approaching) {
-                    class7 = 'bg-rose-50 text-rose-700 border-rose-200 font-bold';
-                    text7 += days7 === 0 ? ' (就在今天)' : ` (還有 ${days7} 天)`;
-                }
-                               
-                // 產生 28 天試壓日的顯示字串與樣式
-                let class28 = 'bg-white text-slate-600 border-slate-200';
-                let text28 = `28d: ${s.test28Day.replace(/-/g, '/')}`;
-                if (is28Past) {
-                    class28 = 'bg-emerald-100 text-emerald-800 border-emerald-200 font-bold';
-                } else if (is28Approaching) {
-                    class28 = 'bg-rose-50 text-rose-700 border-rose-200 font-bold';
-                    text28 += days28 === 0 ? ' (就在今天)' : ` (還有 ${days28} 天)`;
+                    let sLen = 0;
+                    while (sLen < first.length - pLen) {
+                        let char = first[first.length - 1 - sLen];
+                        if (rfidStrs.every(s => s[s.length - 1 - sLen] === char)) sLen++;
+                        else break;
+                    }
+                    suffix = first.substring(first.length - sLen);
                 }
 
-                const castDateOnly = s.castDate.split(' ')[0];
-                
-                // Identify which specimen is assigned to 7 days
-                const assigned7DaySpecimen = s.specimens.find(sp => sp.id === s.specimen7DayId);
+                // 試壓日期的天數計算與徽章樣式 (包含 3天內紅底提示)
+                const d7 = new Date(sheet.test7Day);
+                const d28 = new Date(sheet.test28Day);
+                const diff7 = Math.ceil((d7 - dToday)/(1000*60*60*24));
+                const diff28 = Math.ceil((d28 - dToday)/(1000*60*60*24));
+
+                let badge7 = `<span class="bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded shadow-sm">7d: ${sheet.test7Day.replace(/-/g, '/')}</span>`;
+                if (diff7 < 0) {
+                    badge7 = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2 py-0.5 rounded shadow-sm">7d: ${sheet.test7Day.replace(/-/g, '/')} (已完成)</span>`;
+                } else if (diff7 === 0) {
+                    badge7 = `<span class="bg-rose-500 text-white border border-rose-600 font-bold px-2 py-0.5 rounded shadow-sm animate-pulse">7d: ${sheet.test7Day.replace(/-/g, '/')} (今天會驗)</span>`;
+                } else if (diff7 <= 3) {
+                    badge7 = `<span class="bg-rose-100 text-rose-700 border border-rose-300 font-bold px-2 py-0.5 rounded shadow-sm">7d: ${sheet.test7Day.replace(/-/g, '/')} (剩 ${diff7} 天)</span>`;
+                }
+
+                let badge28 = `<span class="bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded shadow-sm">28d: ${sheet.test28Day.replace(/-/g, '/')}</span>`;
+                if (diff28 < 0) {
+                    badge28 = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2 py-0.5 rounded shadow-sm">28d: ${sheet.test28Day.replace(/-/g, '/')} (已完成)</span>`;
+                } else if (diff28 === 0) {
+                    badge28 = `<span class="bg-rose-500 text-white border border-rose-600 font-bold px-2 py-0.5 rounded shadow-sm animate-pulse">28d: ${sheet.test28Day.replace(/-/g, '/')} (今天會驗)</span>`;
+                } else if (diff28 <= 3) {
+                    badge28 = `<span class="bg-rose-100 text-rose-700 border border-rose-300 font-bold px-2 py-0.5 rounded shadow-sm">28d: ${sheet.test28Day.replace(/-/g, '/')} (剩 ${diff28} 天)</span>`;
+                }
+
+                // 產生拖拉放置區塊 (少於 4 顆不顯示 7 天放置區)
+                const dropZoneHtml = sheet.specimens.length >= 4 ? `
+                    <div class="mt-3 p-3 bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-between">
+                        <div class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-crosshairs text-amber-500"></i> 指定 7 天試壓試體:
+                        </div>
+                        ${sheet.specimen7DayId ? `
+                            <div class="relative bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-2 cursor-pointer" onclick="clear7DaySpecimen(event, '${sheet.formNumber}')" title="點擊取消設定">
+                                <i class="fa-solid fa-check-circle"></i> 試體 #${sheet.specimen7DayId}
+                                <div class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] shadow-sm"><i class="fa-solid fa-times"></i></div>
+                            </div>
+                        ` : `
+                            <div class="drop-zone border-2 border-dashed border-slate-300 text-slate-400 text-xs px-4 py-1.5 rounded-lg font-medium transition"
+                                ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${sheet.formNumber}')">
+                                拖曳試體至此指定
+                            </div>
+                        `}
+                    </div>
+                ` : '';
 
                 const card = document.createElement('div');
-                card.className = "bg-slate-50 border border-slate-200 hover:border-amber-400 rounded-2xl p-5 shadow-sm flex flex-col justify-between transition group";
+                card.className = "bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between";
                 
-                // 產生 4 顆 RFID 晶片的小方塊列表 (加上 cursor-pointer 與 onClick 事件跳轉)
-                // ADDED draggable attributes and event listeners
-                let rfidHtml = s.specimens.map(sp => {
-                    // Don't render it in the grid if it's assigned to the drop zone, unless you want it duplicated
-                    const isAssigned = sp.id === s.specimen7DayId;
-                    const opacityClass = isAssigned ? 'opacity-40 grayscale cursor-not-allowed' : 'cursor-grab active:cursor-grabbing hover:border-amber-400';
+                // 產生四顆晶片小卡
+                let specsHtml = sheet.specimens.map(sp => {
+                    const diffPart = sp.rfid.substring(prefix.length, sp.rfid.length - suffix.length);
+                    const isAssigned = sheet.specimen7DayId === sp.id;
                     
                     return `
-                    <div ${!isAssigned ? `draggable="true" ondragstart="handleDragStart(event, '${s.formNumber}', '${sp.id}')" ondragend="handleDragEnd(event)"` : ''} 
-                         onclick="${!isAssigned ? `jumpToTable('${s.formNumber}')` : ''}" 
-                         class="${opacityClass} bg-white border border-slate-200 rounded-xl p-2.5 transition shadow-sm flex items-center justify-between" 
-                         title="${isAssigned ? '已指派為7天試體' : '拖曳至下方 7d 區域指定，或點擊跳轉至總表'}">
-                        <div class="flex items-center gap-2 overflow-hidden pointer-events-none">
-                            <span class="text-[10px] font-mono bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded font-bold shrink-0">
-                                #${sp.id}
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col gap-2 hover:border-amber-300 transition cursor-pointer ${isAssigned ? 'opacity-50 bg-slate-100' : ''}" 
+                             ${!isAssigned ? `draggable="true" ondragstart="handleDragStart(event, '${sheet.formNumber}', '${sp.id}')" ondragend="handleDragEnd(event)"` : ''}
+                             onclick="jumpToTable('${sheet.formNumber}')" title="點擊跳轉至總表過濾">
+                            <span class="text-[11px] font-mono bg-white text-amber-700 border border-amber-200 px-2 py-0.5 rounded-md font-semibold self-start shadow-sm">
+                                <i class="fa-solid fa-microchip text-amber-500 mr-1"></i>試體 #${sp.id}
                             </span>
-                            <span class="font-mono text-[11px] sm:text-xs text-slate-800 font-bold truncate" title="${sp.rfid}">${sp.rfid}</span>
-                        </div>
-                        <button onclick="event.stopPropagation(); copyToClipboard('${sp.rfid}')" class="text-slate-400 hover:text-slate-800 p-1.5 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs transition shrink-0 ml-2 border border-slate-100" title="複製 RFID">
-                            <i class="fa-solid fa-copy"></i>
-                        </button>
-                    </div>
-                `}).join('');
-
-                // Generate Drop Zone HTML
-                let dropZoneHtml = '';
-                if (assigned7DaySpecimen) {
-                    // State when a specimen is assigned
-                    dropZoneHtml = `
-                        <div class="flex items-center gap-2 bg-emerald-50 border-2 border-emerald-300 rounded-lg px-2 py-1 shadow-inner relative group/zone transition-all min-w-[120px]">
-                            <span class="text-[10px] font-mono bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded font-bold shrink-0">
-                                #${assigned7DaySpecimen.id}
-                            </span>
-                            <span class="font-mono text-[10px] text-emerald-900 font-semibold truncate" title="${assigned7DaySpecimen.rfid}">${assigned7DaySpecimen.rfid.substring(0,8)}...</span>
-                            <button onclick="remove7DayAssignment('${s.formNumber}', event)" class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover/zone:opacity-100 transition-opacity hover:bg-rose-600 shadow" title="移除設定">
-                                <i class="fa-solid fa-times text-[10px]"></i>
-                            </button>
+                            <div class="flex items-center gap-2 flex-1 min-w-0">
+                                <div class="font-mono text-xs sm:text-sm text-slate-800 font-bold truncate">
+                                    ${prefix}<span class="text-amber-600">${diffPart}</span>${suffix}
+                                </div>
+                                <button onclick="copyRfid(event, '${sp.rfid}')" class="ml-auto text-slate-400 hover:text-slate-800 p-1.5 bg-white border border-slate-200 rounded-lg text-xs transition shadow-sm shrink-0" title="複製 RFID">
+                                    <i class="fa-solid fa-copy"></i>
+                                </button>
+                            </div>
                         </div>
                     `;
-                } else {
-                    // State when empty and waiting for drop
-                    dropZoneHtml = `
-                        <div class="drop-zone flex items-center justify-center gap-1 border-2 border-dashed border-slate-300 rounded-lg px-3 py-1 bg-slate-100 text-slate-400 min-w-[120px] transition-colors"
-                             ondragover="handleDragOver(event, '${s.formNumber}')"
-                             ondragleave="handleDragLeave(event)"
-                             ondrop="handleDrop(event, '${s.formNumber}')">
-                            <i class="fa-solid fa-arrow-down text-[10px]"></i>
-                            <span class="text-[10px] font-semibold">拖曳至此指定</span>
-                        </div>
-                    `;
-                }
-
+                }).join('');
 
                 card.innerHTML = `
                     <div>
-                        <div class="flex items-center justify-between mb-3 border-b border-slate-200 pb-3">
-                            <div class="flex items-center gap-2">
-                                <span class="bg-amber-500 text-slate-950 px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1.5">
-                                    <i class="fa-solid fa-file-lines"></i> ${s.formNumber}
-                                </span>
+                        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                            <div class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-file-invoice text-amber-500"></i> ${sheet.formNumber}
                             </div>
-                            <span class="text-xs text-slate-500 font-medium">澆置: ${castDateOnly.replace(/-/g, '/')}</span>
+                            <span class="text-[11px] text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">${sheet.castDate.replace(/-/g, '/')}</span>
                         </div>
                         
-                        <div class="space-y-1.5 text-xs text-slate-600 mb-4">
-                            <div class="flex justify-between items-start gap-2">
-                                <span class="text-slate-400 shrink-0">專案/部位:</span>
-                                <span class="font-medium text-slate-800 text-right" title="${s.projectName} - ${s.memo}">${s.projectName} <span class="text-slate-300 mx-0.5">|</span> ${s.memo}</span>
+                        <div class="space-y-2 text-xs text-slate-600 mb-4">
+                            <div class="flex items-start gap-2">
+                                <span class="text-slate-400 shrink-0 mt-0.5">專案/部位:</span>
+                                <span class="font-medium text-slate-800 leading-relaxed">${sheet.projectName} - ${sheet.memo}</span>
                             </div>
-                            <div class="flex justify-between">
+                            <div class="flex items-center gap-2">
                                 <span class="text-slate-400">設計強度:</span>
-                                <span class="font-medium text-slate-800">${s.strength} kgf/cm²</span>
+                                <span class="font-medium text-slate-800">${sheet.strength} kgf/cm²</span>
                             </div>
                         </div>
 
-                        <!-- 這裡補上遺漏的 RFID 晶片小卡片網格 -->
-                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-2 mb-4">
-                            ${rfidHtml}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+                            ${specsHtml}
                         </div>
+                        ${dropZoneHtml}
                     </div>
 
-                    <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs gap-2">
-                        <div class="flex items-center flex-wrap gap-2 w-full sm:w-auto">
-                            <!-- 7d container with Drop Zone -->
-                            <div class="flex items-center gap-2 p-1.5 bg-slate-100/50 rounded-xl border border-slate-100">
-                                <span class="border px-2 py-1 rounded-md shadow-sm inline-block whitespace-nowrap ${class7}" title="第 7 天試壓日">${text7}</span>
-                                ${dropZoneHtml}
-                            </div>
-                            <!-- 28d container -->
-                            <div class="p-1.5">
-                                <span class="border px-2 py-1 rounded-md shadow-sm inline-block whitespace-nowrap ${class28}" title="第 28 天試壓日">${text28}</span>
-                            </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <div class="flex gap-2">
+                            ${sheet.specimens.length >= 4 ? badge7 : ''}
+                            ${badge28}
                         </div>
                     </div>
                 `;
@@ -933,7 +947,6 @@
 
             sheets.forEach(s => {
                 const matchSearch = s.formNumber.toLowerCase().includes(search) || 
-                                    s.projectName.toLowerCase().includes(search) || 
                                     s.supplier.toLowerCase().includes(search) ||
                                     s.memo.toLowerCase().includes(search);
                 if (!matchSearch) return;
@@ -947,35 +960,26 @@
                 tr.className = "hover:bg-slate-50 transition";
                 
                 let specimensHtml = s.specimens.map(sp => {
-                    const is7Day = sp.id === s.specimen7DayId;
-                    const badgeClass = is7Day ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'text-amber-600 bg-amber-50/50 border-transparent';
-                    const textClass = is7Day ? 'text-emerald-900 font-semibold' : 'text-slate-700';
-                    const label = is7Day ? '<span class="ml-1 text-[10px] bg-emerald-500 text-white px-1 py-0.5 rounded leading-none">7D</span>' : '';
-                    
-                    return `<div class="font-mono text-xs py-0.5 flex items-center gap-2">
-                                <span class="font-bold px-1 rounded border ${badgeClass}">[#${sp.id}]</span> 
-                                <span class="${textClass}">${sp.rfid}</span>${label}
-                            </div>`;
+                    const is7D = s.specimen7DayId === sp.id;
+                    return `
+                        <div class="font-mono text-xs py-0.5 flex items-center gap-2 ${is7D ? 'bg-emerald-50 px-2 rounded font-bold' : ''}">
+                            <span class="${is7D ? 'text-emerald-700' : 'text-amber-600 font-bold'}">[#${sp.id}]</span> 
+                            <span class="${is7D ? 'text-emerald-800' : 'text-slate-700'}">${sp.rfid}</span>
+                            ${is7D ? `<span class="bg-emerald-500 text-white text-[9px] px-1.5 py-0.5 rounded ml-auto">7D</span>` : ''}
+                        </div>
+                    `;
                 }).join('');
 
-                // 判斷日期是否已過 (小於今天為綠色，等於今天為橘色)
-                const is7Past = s.test7Day < today;
-                const is28Past = s.test28Day < today;
-
-                const class7 = is7Past ? 'text-emerald-800 font-bold bg-emerald-100 rounded px-1.5 py-0.5 border border-emerald-200' : 
-                               (s.test7Day === today ? 'text-amber-700 font-bold bg-amber-50 rounded px-1' : 'text-slate-600');
-                               
-                const class28 = is28Past ? 'text-emerald-800 font-bold bg-emerald-100 rounded px-1.5 py-0.5 border border-emerald-200' : 
-                               (s.test28Day === today ? 'text-amber-700 font-bold bg-amber-50 rounded px-1' : 'text-slate-600');
+                const has7D = s.specimens.length >= 4;
 
                 tr.innerHTML = `
                     <td class="p-3.5 font-bold text-slate-900 font-mono whitespace-nowrap">${s.formNumber}</td>
                     <td class="p-3.5 text-slate-600 text-xs whitespace-nowrap">${s.castDate.replace(/-/g, '/')}</td>
                     <td class="p-3.5 whitespace-nowrap">${specimensHtml}</td>
-                    <td class="p-3.5 text-slate-800 font-medium text-xs whitespace-nowrap">${s.memo}</td>
+                    <td class="p-3.5 text-slate-900 font-medium text-xs whitespace-nowrap">${s.memo}</td>
                     <td class="p-3.5 text-slate-600 text-xs whitespace-nowrap">${s.supplier}</td>
-                    <td class="p-3.5 whitespace-nowrap"><span class="text-xs inline-block ${class7}">${s.test7Day.replace(/-/g, '/')}</span></td>
-                    <td class="p-3.5 whitespace-nowrap"><span class="text-xs inline-block ${class28}">${s.test28Day.replace(/-/g, '/')}</span></td>
+                    <td class="p-3.5 text-xs whitespace-nowrap ${!has7D ? 'text-slate-400' : (s.test7Day <= today ? 'text-emerald-700 font-bold bg-emerald-100 rounded px-1' : 'text-slate-600')}">${has7D ? s.test7Day.replace(/-/g, '/') : '-'}</td>
+                    <td class="p-3.5 text-xs whitespace-nowrap ${s.test28Day <= today ? 'text-emerald-700 font-bold bg-emerald-100 rounded px-1' : 'text-slate-600'}">${s.test28Day.replace(/-/g, '/')}</td>
                     <td class="p-3.5 text-right whitespace-nowrap">
                         <button onclick="deleteSheet('${s.formNumber}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition text-xs border border-rose-200" title="刪除此表單記錄">
                             <i class="fa-solid fa-trash"></i>
@@ -990,26 +994,6 @@
             } else {
                 if(emptyState) emptyState.classList.add('hidden');
             }
-        }
-
-        function jumpToTable(formNumber) {
-            // 1. 切換至總表分頁
-            switchTab('query');
-            
-            // 2. 將搜尋框設定為該表單編號
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.value = formNumber;
-            }
-            
-            // 3. 確保過濾器設為「所有表單記錄」，避免因時間過濾導致找不到
-            const filterTypeElem = document.getElementById('filterDateType');
-            if (filterTypeElem) {
-                filterTypeElem.value = 'all';
-            }
-            
-            // 4. 重新渲染總表，此時畫面只會出現該表單的專屬列
-            renderTable();
         }
 
         async function handleImageUpload(event) {
@@ -1029,6 +1013,13 @@
                 document.getElementById('ocrStatusText').innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> AI 正在分析照片中的表格與 RFID 晶片碼...`;
 
                 try {
+                    const apiKey = getApiKey();
+                    if (!apiKey) {
+                        throw new Error("API 金鑰尚未設定！請先在上方輸入框填寫 Gemini API Key。");
+                    }
+
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
                     const promptText = "請仔細辨識這張混凝土試體取樣記錄表照片中的資訊，並以 JSON 格式回傳以下欄位：\n" +
                         "1. formNumber (表單編號，例如 1150825-210-01)\n" +
                         "2. castDate (取樣日期時間，轉換為 YYYY-MM-DDTHH:mm 格式，若無時間預設 08:00)\n" +
@@ -1045,12 +1036,7 @@
                                 role: "user",
                                 parts: [
                                     { text: promptText },
-                                    {
-                                        inlineData: {
-                                            mimeType: mimeType,
-                                            data: base64String
-                                        }
-                                    }
+                                    { inlineData: { mimeType: mimeType, data: base64String } }
                                 ]
                             }
                         ],
@@ -1058,9 +1044,6 @@
                             responseMimeType: "application/json"
                         }
                     };
-
-                    const apiKey = ""; // API Key 可以在此處設定
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
                     
                     const response = await fetch(apiUrl, {
                         method: 'POST',
@@ -1069,35 +1052,38 @@
                     });
 
                     const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.error?.message || `API 請求失敗 (狀態碼: ${response.status})`);
+                    }
+
                     const candidate = result.candidates?.[0];
                     if (candidate && candidate.content?.parts?.[0]?.text) {
                         const jsonText = candidate.content.parts[0].text;
                         const parsed = JSON.parse(jsonText);
 
                         if(parsed.formNumber) document.getElementById('formNumber').value = parsed.formNumber;
-                        if(parsed.castDate) {
-                            document.getElementById('castDate').value = parsed.castDate.replace(' ', 'T');
-                        }
+                        if(parsed.castDate) document.getElementById('castDate').value = parsed.castDate.replace(' ', 'T');
                         if(parsed.projectName) document.getElementById('projectName').value = parsed.projectName;
                         if(parsed.supplier) document.getElementById('supplier').value = parsed.supplier;
                         if(parsed.memo) document.getElementById('memo').value = parsed.memo;
                         if(parsed.strength) document.getElementById('strength').value = parsed.strength;
 
-                        if(parsed.rfid1) document.getElementById('rfid1').value = parsed.rfid1;
-                        if(parsed.rfid2) document.getElementById('rfid2').value = parsed.rfid2;
-                        if(parsed.rfid3) document.getElementById('rfid3').value = parsed.rfid3;
-                        if(parsed.rfid4) document.getElementById('rfid4').value = parsed.rfid4;
+                        if(parsed.rfid1) { document.getElementById('rfid1').value = parsed.rfid1; document.getElementById('hasSpecimen1').checked = true; toggleSpecimen(1); }
+                        if(parsed.rfid2) { document.getElementById('rfid2').value = parsed.rfid2; document.getElementById('hasSpecimen2').checked = true; toggleSpecimen(2); }
+                        if(parsed.rfid3) { document.getElementById('rfid3').value = parsed.rfid3; document.getElementById('hasSpecimen3').checked = true; toggleSpecimen(3); }
+                        if(parsed.rfid4) { document.getElementById('rfid4').value = parsed.rfid4; document.getElementById('hasSpecimen4').checked = true; toggleSpecimen(4); }
 
                         calculateTestDates();
                         document.getElementById('ocrStatusText').innerHTML = `<i class="fa-solid fa-check-circle text-emerald-600"></i> AI 辨識成功！已自動填入欄位與 RFID 標籤。`;
                         showModal('AI 辨識完成', '已成功自照片中解析取樣記錄與 RFID 晶片編號！', 'success');
                     } else {
-                        throw new Error("Invalid model response");
+                        throw new Error("模型未回傳有效結果");
                     }
                 } catch(err) {
-                    console.error(err);
+                    console.error("Gemini 辨識錯誤:", err);
                     document.getElementById('ocrStatusText').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> AI 辨識遇到狀況，請手動核對並填寫下方欄位。`;
-                    showModal('提示', 'AI 無法完全解析圖片，請手動確認欄位或重新上傳較清晰的照片。', 'warning');
+                    showModal('提示', `AI 辨識失敗（${err.message || '無法解析圖片'}），請手動確認欄位或重新上傳。`, 'warning');
                 }
             };
             reader.readAsDataURL(file);
@@ -1119,8 +1105,8 @@
 
             const p7 = document.getElementById('preview7Day');
             const p28 = document.getElementById('preview28Day');
-            if(p7) p7.innerText = str7;
-            if(p28) p28.innerText = str28;
+            if(p7) p7.innerText = str7.replace(/-/g, '/');
+            if(p28) p28.innerText = str28.replace(/-/g, '/');
 
             const dateStr = castDateVal.split('T')[0].replace(/-/g, '');
             const formNumElem = document.getElementById('formNumber');
@@ -1133,8 +1119,26 @@
             const randHex = () => Math.floor(1000 + Math.random() * 9000);
             for(let i=1; i<=4; i++) {
                 const el = document.getElementById(`rfid${i}`);
-                if(el) {
+                const cb = document.getElementById(`hasSpecimen${i}`);
+                if(el && cb && cb.checked) {
                     el.value = `RE280117020000${randHex()}ECAF0B25`;
+                }
+            }
+        }
+
+        function toggleSpecimen(index) {
+            const checkbox = document.getElementById(`hasSpecimen${index}`);
+            const input = document.getElementById(`rfid${index}`);
+            if (checkbox && input) {
+                if (checkbox.checked) {
+                    input.disabled = false;
+                    input.required = true;
+                    input.placeholder = "RE280117020000...";
+                } else {
+                    input.disabled = true;
+                    input.required = false;
+                    input.value = "";
+                    input.placeholder = "無試體";
                 }
             }
         }
@@ -1148,10 +1152,19 @@
             const memo = document.getElementById('memo').value.trim() || '一般取樣';
             const strength = document.getElementById('strength').value;
 
-            const r1 = document.getElementById('rfid1').value.trim();
-            const r2 = document.getElementById('rfid2').value.trim();
-            const r3 = document.getElementById('rfid3').value.trim();
-            const r4 = document.getElementById('rfid4').value.trim();
+            const newSpecimens = [];
+            for (let i = 1; i <= 4; i++) {
+                const checkbox = document.getElementById(`hasSpecimen${i}`);
+                const rfidInput = document.getElementById(`rfid${i}`);
+                if (checkbox && checkbox.checked && rfidInput.value.trim() !== "") {
+                    newSpecimens.push({ id: String(i), rfid: rfidInput.value.trim() });
+                }
+            }
+
+            if (newSpecimens.length === 0) {
+                showModal('注意', '至少需要有一顆試體才能建立表單！', 'warning');
+                return;
+            }
 
             const castDateObj = new Date(castDateRaw);
             const d7 = new Date(castDateObj); d7.setDate(castDateObj.getDate() + 7);
@@ -1169,13 +1182,8 @@
                 strength,
                 test7Day: d7.toISOString().split('T')[0],
                 test28Day: d28.toISOString().split('T')[0],
-                specimen7DayId: null, // 新增：預設為空
-                specimens: [
-                    { id: '1', rfid: r1 },
-                    { id: '2', rfid: r2 },
-                    { id: '3', rfid: r3 },
-                    { id: '4', rfid: r4 }
-                ]
+                specimen7DayId: null,
+                specimens: newSpecimens
             };
 
             if(sheets.some(s => s.formNumber === formNumber)) {
@@ -1187,8 +1195,26 @@
             saveData();
             refreshAllViews();
 
-            showModal('新增成功', `表單 ${formNumber} 與 4 顆 RFID 晶片已成功建檔並排算試壓行程！`, 'success');
+            // Webhook 同步傳送資料到 Make.com
+            const webhookUrl = 'https://hook.eu1.make.com/s8xfpuham4pgw6boorsijykpd1hp9hs0';
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newSheet)
+            }).then(res => console.log('資料已成功推播至 Make Webhook'))
+              .catch(err => console.error("Make Webhook 傳送失敗:", err));
+
+            showModal('新增成功', `表單 ${formNumber} 與 ${newSpecimens.length} 顆 RFID 晶片已成功建檔並同步至 Make！`, 'success');
             document.getElementById('specimenForm').reset();
+            
+            for (let i = 1; i <= 4; i++) {
+                const input = document.getElementById(`rfid${i}`);
+                if(input) {
+                    input.disabled = false;
+                    input.placeholder = "RE280117020000...";
+                }
+            }
+            
             document.getElementById('uploadPlaceholder').classList.remove('hidden');
             document.getElementById('uploadPreviewContainer').classList.add('hidden');
             switchTab('rfidFocus');
@@ -1212,7 +1238,13 @@
             d14DaysLater.setDate(dNow.getDate() + 14);
 
             sheets.forEach(s => {
-                [ {date: s.test7Day, type: '7天抗壓試驗'}, {date: s.test28Day, type: '28天抗壓試驗'} ].forEach(item => {
+                const testsToSchedule = [];
+                if (s.specimens && s.specimens.length >= 4) {
+                    testsToSchedule.push({date: s.test7Day, type: '7天抗壓試驗'});
+                }
+                testsToSchedule.push({date: s.test28Day, type: '28天抗壓試驗'});
+
+                testsToSchedule.forEach(item => {
                     const tDate = new Date(item.date);
                     
                     if (item.date === today) {
@@ -1241,7 +1273,6 @@
                 todayTests.forEach(t => {
                     const div = document.createElement('div');
                     div.className = "bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between";
-                    // 移除了原本的 iOS App 捷徑按鈕
                     div.innerHTML = `
                         <div>
                             <span class="text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded">${t.testType}</span>
@@ -1273,7 +1304,6 @@
         }
 
         function deleteSheet(formNumber) {
-            // 為了符合無 confirm / alert 原則，採用直接刪除配合自訂提醒的方式
             sheets = sheets.filter(s => s.formNumber !== formNumber);
             saveData();
             refreshAllViews();

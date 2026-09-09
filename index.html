@@ -599,74 +599,6 @@
 
         let sheets = [];
         let draggedItem = null;
-        let editingFormNumber = null; // 新增：用於記錄目前正在編輯哪一筆表單
-
-        function startEdit(formNumber) {
-            editingFormNumber = formNumber;
-            renderTable();
-        }
-
-        function cancelEdit() {
-            editingFormNumber = null;
-            renderTable();
-        }
-
-        function saveEdit(oldFormNumber) {
-            const sheet = sheets.find(s => s.formNumber === oldFormNumber);
-            if (!sheet) return;
-
-            const newFormNumber = document.getElementById('edit-formNumber').value.trim();
-            if (newFormNumber !== oldFormNumber && sheets.some(s => s.formNumber === newFormNumber)) {
-                showModal('注意', `表單編號 [${newFormNumber}] 已存在系統中，請使用其他編號。`, 'warning');
-                return;
-            }
-
-            const newCastDateVal = document.getElementById('edit-castDate').value;
-            if (!newCastDateVal) {
-                showModal('注意', '取樣時間不能為空。', 'warning');
-                return;
-            }
-
-            // 驗證並更新 RFIDs
-            const newSpecimens = [];
-            for (let i = 0; i < sheet.specimens.length; i++) {
-                const rfidInput = document.getElementById(`edit-rfid-${i}`);
-                if (rfidInput) {
-                    const val = rfidInput.value.trim();
-                    if (val.length !== 24) {
-                        showModal('長度錯誤', `試體 #${sheet.specimens[i].id} 的 RFID 必須為 24 碼（目前 ${val.length} 碼）。`, 'warning');
-                        return;
-                    }
-                    newSpecimens.push({ id: sheet.specimens[i].id, rfid: val });
-                }
-            }
-
-            const newMemo = document.getElementById('edit-memo').value.trim();
-            const newSupplier = document.getElementById('edit-supplier').value.trim();
-            const newStrength = document.getElementById('edit-strength').value;
-
-            // 重新計算日期
-            const castDateObj = new Date(newCastDateVal);
-            const d7 = new Date(castDateObj); d7.setDate(castDateObj.getDate() + 7);
-            const d28 = new Date(castDateObj); d28.setDate(castDateObj.getDate() + 28);
-            const pad = n => String(n).padStart(2, '0');
-            const castDateFormatted = `${castDateObj.getFullYear()}-${pad(castDateObj.getMonth()+1)}-${pad(castDateObj.getDate())} ${pad(castDateObj.getHours())}:${pad(castDateObj.getMinutes())}`;
-
-            // 寫入新資料
-            sheet.formNumber = newFormNumber || oldFormNumber;
-            sheet.castDate = castDateFormatted;
-            sheet.memo = newMemo;
-            sheet.supplier = newSupplier;
-            sheet.strength = newStrength || sheet.strength;
-            sheet.specimens = newSpecimens;
-            sheet.test7Day = d7.toISOString().split('T')[0];
-            sheet.test28Day = d28.toISOString().split('T')[0];
-
-            saveData();
-            editingFormNumber = null;
-            refreshAllViews();
-            showModal('儲存成功', `表單 ${sheet.formNumber} 的資料已成功更新。`, 'success');
-        }
 
         function loadData() {
             const stored = localStorage.getItem(STORAGE_KEY);
@@ -1073,78 +1005,33 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
                 
-                if (s.formNumber === editingFormNumber) {
-                    // 編輯模式
-                    let rfidInputsHtml = s.specimens.map((sp, idx) => `
-                        <div class="flex items-center gap-1.5 mb-1.5">
-                            <span class="text-[10px] w-6 text-slate-500 font-bold">#${sp.id}</span>
-                            <input type="text" id="edit-rfid-${idx}" value="${sp.rfid}" maxlength="24" placeholder="輸入 24 碼 RFID" class="w-48 px-1.5 py-1 text-[11px] border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono shadow-inner">
+                let specimensHtml = s.specimens.map(sp => {
+                    const is7D = s.specimen7DayId === sp.id;
+                    return `
+                        <div class="font-mono text-xs py-0.5 flex items-center gap-2 ${is7D ? 'bg-emerald-50 px-2 rounded font-bold' : ''}">
+                            <span class="${is7D ? 'text-emerald-700' : 'text-amber-600 font-bold'}">[#${sp.id}]</span> 
+                            <span class="${is7D ? 'text-emerald-800' : 'text-slate-700'}">${sp.rfid}</span>
+                            ${is7D ? `<span class="bg-emerald-500 text-white text-[9px] px-1.5 py-0.5 rounded ml-auto">7D</span>` : ''}
                         </div>
-                    `).join('');
-
-                    const safeStrength = s.strength || '210';
-
-                    tr.innerHTML = `
-                        <td class="p-2"><input type="text" id="edit-formNumber" value="${s.formNumber}" class="w-full px-2 py-1.5 text-xs border border-amber-300 rounded font-mono focus:outline-none focus:ring-1 focus:ring-amber-500 shadow-inner"></td>
-                        <td class="p-2"><input type="datetime-local" id="edit-castDate" value="${s.castDate.replace(' ', 'T')}" class="w-full px-2 py-1.5 text-xs border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 shadow-inner"></td>
-                        <td class="p-2 align-top pt-3">${rfidInputsHtml}</td>
-                        <td class="p-2 align-top pt-2">
-                            <input type="text" id="edit-memo" value="${s.memo}" class="w-full mb-1.5 px-2 py-1.5 text-xs border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 shadow-inner" placeholder="取樣位置">
-                            <select id="edit-strength" class="w-full px-2 py-1.5 text-xs border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 shadow-inner">
-                                <option value="210" ${safeStrength === '210' ? 'selected' : ''}>210 kgf/cm²</option>
-                                <option value="280" ${safeStrength === '280' ? 'selected' : ''}>280 kgf/cm²</option>
-                                <option value="300" ${safeStrength === '300' ? 'selected' : ''}>300 kgf/cm²</option>
-                                <option value="350" ${safeStrength === '350' ? 'selected' : ''}>350 kgf/cm²</option>
-                            </select>
-                        </td>
-                        <td class="p-2 align-top pt-2"><input type="text" id="edit-supplier" value="${s.supplier}" class="w-full px-2 py-1.5 text-xs border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 shadow-inner"></td>
-                        <td class="p-2 text-xs text-slate-400 align-middle text-center"><i class="fa-solid fa-calculator text-amber-500/50 mb-1"></i><br>自動重算</td>
-                        <td class="p-2 text-xs text-slate-400 align-middle text-center"><i class="fa-solid fa-calculator text-amber-500/50 mb-1"></i><br>自動重算</td>
-                        <td class="p-2 text-right whitespace-nowrap align-middle">
-                            <button onclick="saveEdit('${s.formNumber}')" class="p-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl transition text-xs shadow-md shadow-emerald-500/20 mr-1" title="儲存修改">
-                                <i class="fa-solid fa-check mr-1"></i>儲存
-                            </button>
-                            <button onclick="cancelEdit()" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition text-xs border border-slate-200" title="取消">
-                                取消
-                            </button>
-                        </td>
                     `;
-                } else {
-                    // 瀏覽模式
-                    let specimensHtml = s.specimens.map(sp => {
-                        const is7D = s.specimen7DayId === sp.id;
-                        return `
-                            <div class="font-mono text-xs py-0.5 flex items-center gap-2 ${is7D ? 'bg-emerald-50 px-2 rounded font-bold' : ''}">
-                                <span class="${is7D ? 'text-emerald-700' : 'text-amber-600 font-bold'}">[#${sp.id}]</span> 
-                                <span class="${is7D ? 'text-emerald-800' : 'text-slate-700'}">${sp.rfid}</span>
-                                ${is7D ? `<span class="bg-emerald-500 text-white text-[9px] px-1.5 py-0.5 rounded ml-auto">7D</span>` : ''}
-                            </div>
-                        `;
-                    }).join('');
+                }).join('');
 
-                    const has7D = s.specimens.length >= 4;
+                const has7D = s.specimens.length >= 4;
 
-                    tr.innerHTML = `
-                        <td class="p-3.5 font-bold text-slate-900 font-mono whitespace-nowrap align-top">${s.formNumber}</td>
-                        <td class="p-3.5 text-slate-600 text-xs whitespace-nowrap align-top">${s.castDate.replace(/-/g, '/')}</td>
-                        <td class="p-3.5 whitespace-nowrap align-top">${specimensHtml}</td>
-                        <td class="p-3.5 text-slate-900 font-medium text-xs whitespace-nowrap align-top">
-                            ${s.memo}
-                            ${s.strength ? `<div class="text-[10px] font-bold text-amber-700 mt-1 bg-amber-50 inline-block px-1.5 py-0.5 rounded border border-amber-200">設計強度: ${s.strength} kgf/cm²</div>` : ''}
-                        </td>
-                        <td class="p-3.5 text-slate-600 text-xs whitespace-nowrap align-top">${s.supplier}</td>
-                        <td class="p-3.5 text-xs whitespace-nowrap align-top ${!has7D ? 'text-slate-400' : (s.test7Day <= today ? 'text-emerald-700 font-bold bg-emerald-100 rounded px-1' : 'text-slate-600')}">${has7D ? s.test7Day.replace(/-/g, '/') : '-'}</td>
-                        <td class="p-3.5 text-xs whitespace-nowrap align-top ${s.test28Day <= today ? 'text-emerald-700 font-bold bg-emerald-100 rounded px-1' : 'text-slate-600'}">${s.test28Day.replace(/-/g, '/')}</td>
-                        <td class="p-3.5 text-right whitespace-nowrap align-top">
-                            <button onclick="startEdit('${s.formNumber}')" class="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition text-xs border border-blue-200 mr-1 shadow-sm" title="編輯此紀錄">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                            <button onclick="deleteSheet('${s.formNumber}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition text-xs border border-rose-200 shadow-sm" title="刪除此表單記錄">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                }
+                tr.innerHTML = `
+                    <td class="p-3.5 font-bold text-slate-900 font-mono whitespace-nowrap">${s.formNumber}</td>
+                    <td class="p-3.5 text-slate-600 text-xs whitespace-nowrap">${s.castDate.replace(/-/g, '/')}</td>
+                    <td class="p-3.5 whitespace-nowrap">${specimensHtml}</td>
+                    <td class="p-3.5 text-slate-900 font-medium text-xs whitespace-nowrap">${s.memo}</td>
+                    <td class="p-3.5 text-slate-600 text-xs whitespace-nowrap">${s.supplier}</td>
+                    <td class="p-3.5 text-xs whitespace-nowrap ${!has7D ? 'text-slate-400' : (s.test7Day <= today ? 'text-emerald-700 font-bold bg-emerald-100 rounded px-1' : 'text-slate-600')}">${has7D ? s.test7Day.replace(/-/g, '/') : '-'}</td>
+                    <td class="p-3.5 text-xs whitespace-nowrap ${s.test28Day <= today ? 'text-emerald-700 font-bold bg-emerald-100 rounded px-1' : 'text-slate-600'}">${s.test28Day.replace(/-/g, '/')}</td>
+                    <td class="p-3.5 text-right whitespace-nowrap">
+                        <button onclick="deleteSheet('${s.formNumber}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition text-xs border border-rose-200" title="刪除此表單記錄">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
                 tbody.appendChild(tr);
             });
 
@@ -1155,7 +1042,52 @@
             }
         }
 
-        async function handleImageUpload(event) {
+        function calculateTestDates() {
+            const castDateVal = document.getElementById('castDate').value;
+            if (!castDateVal) return;
+
+            const castDate = new Date(castDateVal);
+            
+            const d7 = new Date(castDate);
+            d7.setDate(castDate.getDate() + 7);
+            const str7 = d7.toISOString().split('T')[0];
+
+            const d28 = new Date(castDate);
+            d28.setDate(castDate.getDate() + 28);
+            const str28 = d28.toISOString().split('T')[0];
+
+            const p7 = document.getElementById('preview7Day');
+            const p28 = document.getElementById('preview28Day');
+            if(p7) p7.innerText = str7.replace(/-/g, '/');
+            if(p28) p28.innerText = str28.replace(/-/g, '/');
+
+            const dateStr = castDateVal.split('T')[0].replace(/-/g, '');
+            const formNumElem = document.getElementById('formNumber');
+            if(formNumElem && !formNumElem.value) {
+                formNumElem.value = `${dateStr}-210-01`;
+            }
+        }
+
+        function fillRandomRfidBatch() {
+            const randHex = () => Math.floor(1000 + Math.random() * 9000); // 4 digits
+            for(let i=1; i<=4; i++) {
+                const el = document.getElementById(`rfid${i}`);
+                const cb = document.getElementById(`hasSpecimen${i}`);
+                if(el && cb && cb.checked) {
+                    // 12 prefix + 4 random + 8 suffix = 24 chars total
+                    el.value = `RE2801170200${randHex()}ECAF0B25`;
+                }
+            }
+        }
+
+        function toggleSpecimen(index) {
+            const checkbox = document.getElementById(`hasSpecimen${index}`);
+            const input = document.getElementById(`rfid${index}`);
+            if (checkbox && input) {
+                if (checkbox.checked) {
+                    input.disabled = false;
+                    input.required = true;
+                    input.placeholder = "請輸入24碼RFID...";
                 } else {
                     input.disabled = true;
                     input.required = false;

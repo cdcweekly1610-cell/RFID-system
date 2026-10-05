@@ -58,26 +58,6 @@ AI 辨識：Google Gemini API (gemini-1.5-flash)
 
 要讓系統的 AI 照片辨識功能 與 Webhook 外部同步功能 正常運作，您需要修改 index.html 內的兩個參數：
 
-1. 設定 Gemini API Key (啟動 AI 功能)
-
-請在 index.html 檔案中搜尋 handleImageUpload 函式，找到以下段落並填入您的金鑰：
-
-// 請替換為您真實且有效的_API_KEY
-const apiKey = "請替換為您的_API_KEY"; 
-
-
-若尚未擁有 API Key，請前往 Google AI Studio 免費申請。
-
-2. 設定 Make.com Webhook (啟動資料同步)
-
-請在 index.html 檔案中搜尋 handleFormSubmit 函式，找到以下段落，確認或替換為您專屬的 Webhook URL：
-
-// Sync to Make Webhook
-const webhookUrl = "https://hook.eu1.make.com/s8xfpuham4pgw6boorsijykpd1hp9hs0";
-
-
-資料送出格式為 JSON，包含表單號碼、日期、工程資訊及試體陣列，您可以在 Make.com 中解析並綁定至 Notion。
-
 💡 使用說明
 
 初次使用：網頁載入時若無資料，會自動寫入內建的 4 筆示範資料供測試。您可以點擊右上角「重新載入示範記錄表」隨時重置。

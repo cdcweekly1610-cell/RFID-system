@@ -10,8 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts Inter & Noto Sans TC -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-    <!-- marked.js for Markdown parsing in AI Chat -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -28,18 +26,29 @@
 </head>
 <body class="h-full bg-slate-100 text-slate-800 font-sans flex flex-col antialiased selection:bg-amber-400 selection:text-slate-900">
 
-    <!-- Top Header -->
     <header class="bg-white border-b border-slate-200 text-slate-900 shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 p-2.5 rounded-2xl font-bold shadow-md shadow-amber-500/20">
-                    <i class="fa-solid fa-microchip text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-base sm:text-lg font-bold tracking-wide flex items-center gap-2">
-                        混凝土試體 RFID 核心追蹤管理
-                    </h1>
-                    <p class="text-xs text-slate-500">純淨手動建檔與完整排程版本</p>
+            <div class="flex items-center space-x-3 shrink-0">
+                <!-- 內嵌 SVG 繪製的專屬 Logo (免圖檔、不失真) -->
+                <div class="h-10 sm:h-12 md:h-14 flex items-center py-1">
+                    <svg viewBox="0 0 460 130" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMid meet" class="h-full w-auto drop-shadow-sm">
+                        <!-- 外框與標籤孔 -->
+                        <path d="M 60 20 H 360 L 440 65 L 360 110 H 30 L 50 50" stroke="#0F2F4A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="390" cy="65" r="9" stroke="#0F2F4A" stroke-width="6"/>
+                        <!-- RFID 主字體 -->
+                        <text x="55" y="75" font-family="'Inter', sans-serif" font-style="italic" font-weight="900" font-size="64" fill="#0F2F4A" letter-spacing="-2">RFID</text>
+                        <!-- 右上角無線電波 -->
+                        <path d="M 295 55 A 20 20 0 0 0 315 35" stroke="#0F2F4A" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M 310 65 A 35 35 0 0 0 340 25" stroke="#0F2F4A" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M 325 75 A 50 50 0 0 0 365 15" stroke="#0F2F4A" stroke-width="4" stroke-linecap="round"/>
+                        <!-- 底部線條與節點 -->
+                        <path d="M 40 95 H 310 L 325 80" stroke="#0F2F4A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="180" cy="95" r="4" fill="#fff" stroke="#0F2F4A" stroke-width="3"/>
+                        <circle cx="220" cy="95" r="4" fill="#fff" stroke="#0F2F4A" stroke-width="3"/>
+                        <circle cx="260" cy="95" r="4" fill="#fff" stroke="#0F2F4A" stroke-width="3"/>
+                        <!-- 底部文字 -->
+                        <text x="65" y="105" font-family="'Noto Sans TC', sans-serif" font-weight="700" font-size="16" fill="#0F2F4A" letter-spacing="1">混凝土試體 RFID 核心追蹤管理</text>
+                    </svg>
                 </div>
             </div>
             <div class="flex items-center space-x-2 sm:space-x-3">
@@ -57,7 +66,6 @@
                     <span class="hidden sm:inline">重新載入示範記錄表</span>
                     <span class="sm:hidden">載入表單</span>
                 </button>
-                
                 <!-- Notion 頁面連結按鈕 -->
                 <a href="https://app.notion.com/p/RFID-3af74dce1b6a80778420fdcd7389a46e?source=copy_link" target="_blank" rel="noopener noreferrer" 
                     class="bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold px-3.5 py-2 rounded-xl transition flex items-center space-x-2 shadow-sm">
@@ -72,7 +80,6 @@
     </header>
 
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
-        
         <!-- Top Metrics & RFID Focus Stats -->
         <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- RFID Active Badge Card -->
@@ -86,22 +93,18 @@
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 relative z-10">
-                        <!-- 標籤總數 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex flex-col items-center justify-center shadow-sm">
                             <span class="text-[11px] text-slate-500 font-semibold mb-0.5">標籤總數</span>
                             <span class="text-xl font-bold text-slate-800 font-mono">600</span>
                         </div>
-                        <!-- 已使用 -->
                         <div class="bg-blue-50 border border-blue-200 rounded-xl p-2.5 flex flex-col items-center justify-center shadow-sm">
                             <span class="text-[11px] text-blue-700 font-semibold mb-0.5">已綁定表單</span>
                             <span id="usedRfidCount" class="text-xl font-bold text-blue-800 font-mono">0</span>
                         </div>
-                        <!-- 已試驗 -->
                         <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 flex flex-col items-center justify-center shadow-sm">
                             <span class="text-[11px] text-emerald-700 font-semibold mb-0.5">已試驗</span>
                             <span id="testedRfidCount" class="text-xl font-bold text-emerald-800 font-mono">0</span>
                         </div>
-                        <!-- 尚未試驗 -->
                         <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5 flex flex-col items-center justify-center shadow-sm">
                             <span class="text-[11px] text-amber-700 font-semibold mb-0.5">尚未試驗</span>
                             <span id="untestedRfidCount" class="text-xl font-bold text-amber-800 font-mono">0</span>
@@ -132,7 +135,6 @@
             </div>
         </section>
 
-        <!-- Navigation Tabs -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-3 gap-3">
             <div class="flex space-x-2 overflow-x-auto w-full sm:w-auto">
                 <button onclick="switchTab('rfidFocus')" id="tabBtn-rfidFocus" class="px-4 py-2.5 text-sm font-semibold rounded-xl bg-amber-500 text-slate-950 transition flex items-center space-x-2 shadow-md shadow-amber-500/20 whitespace-nowrap">
@@ -144,8 +146,8 @@
                     <span>完整表單與試體清單</span>
                 </button>
                 <button onclick="switchTab('input')" id="tabBtn-input" class="px-4 py-2.5 text-sm font-semibold rounded-xl bg-white text-slate-600 hover:bg-slate-50 transition flex items-center space-x-2 border border-slate-200 whitespace-nowrap shadow-sm">
-                    <i class="fa-solid fa-wand-magic-sparkles text-amber-600"></i>
-                    <span>AI 智慧辨識與新增</span>
+                    <i class="fa-solid fa-pen-to-square text-amber-600"></i>
+                    <span>新增試體記錄與綁定</span>
                 </button>
                 <button onclick="switchTab('schedule')" id="tabBtn-schedule" class="px-4 py-2.5 text-sm font-semibold rounded-xl bg-white text-slate-600 hover:bg-slate-50 transition flex items-center space-x-2 border border-slate-200 whitespace-nowrap shadow-sm">
                     <i class="fa-solid fa-calendar-check"></i>
@@ -209,7 +211,7 @@
                             <tr class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold tracking-wider border-b border-slate-200">
                                 <th class="p-3.5 whitespace-nowrap">表單編號</th>
                                 <th class="p-3.5 whitespace-nowrap">取樣時間</th>
-                                <th class="p-3.5 min-w-[200px] whitespace-nowrap">試體編號 / RFID 標籤</th>
+                                <th class="p-3.5 min-w-[240px] whitespace-nowrap">試體編號 / RFID 標籤</th>
                                 <th class="p-3.5 whitespace-nowrap">取樣位置 / 強度</th>
                                 <th class="p-3.5 whitespace-nowrap">供應商</th>
                                 <th class="p-3.5 whitespace-nowrap">7天試壓日</th>
@@ -229,61 +231,20 @@
             </div>
         </div>
 
-        <!-- TAB 3: Data Creation Panel (AI & Manual) -->
+        <!-- TAB 3: Data Creation Panel (Manual Only) -->
         <div id="tabContent-input" class="hidden space-y-6">
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 pb-4 border-b border-slate-100 gap-4">
                     <div>
                         <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                            <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i> 智慧新增試體記錄與綁定
+                            <i class="fa-solid fa-pen-to-square text-amber-600"></i> 新增試體記錄與綁定
                         </h2>
-                        <p class="text-xs text-slate-500">上傳表單照片或貼上文字訊息，讓 Gemini AI 幫您自動填寫以下記錄表，並配置 RFID 標籤。</p>
-                    </div>
-                </div>
-
-                <!-- AI Extraction Section -->
-                <div class="bg-slate-50 rounded-xl border border-slate-200 p-5 mb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Image OCR -->
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
-                                <i class="fa-solid fa-image text-slate-500"></i> 上傳表單照片 (Image OCR)
-                            </label>
-                            <div class="border-2 border-dashed border-slate-300 hover:border-indigo-400 rounded-xl p-4 text-center transition bg-white relative">
-                                <input type="file" id="aiImageInput" accept="image/*" onchange="handleAiImageUpload(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                                <div id="aiImagePlaceholder" class="pointer-events-none">
-                                    <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-2 shadow-sm border border-indigo-100">
-                                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                                    </div>
-                                    <span class="text-xs font-medium text-slate-600">點擊或拖曳上傳記錄表</span>
-                                </div>
-                                <div id="aiImagePreviewContainer" class="hidden flex flex-col items-center z-20 relative">
-                                    <img id="aiPreviewImg" src="" class="max-h-32 rounded-lg object-contain shadow-sm border border-slate-200">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Text Extraction -->
-                        <div class="flex flex-col">
-                            <label class="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
-                                <i class="fa-solid fa-comment-sms text-slate-500"></i> 或貼上文字訊息 (Text Extraction)
-                            </label>
-                            <textarea id="aiTextInput" rows="4" placeholder="例如：明天早上 8 點在防疫中心北側澆置，強度 280，供應商宥辰，表單號 1150999-280..." class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex-1 resize-none shadow-inner"></textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
-                        <div id="aiExtractionStatus" class="text-xs font-medium text-slate-500 flex items-center gap-2">
-                            <!-- Status messages will appear here -->
-                        </div>
-                        <button type="button" onclick="triggerAiExtraction()" id="btnExtract" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-md flex items-center gap-2">
-                            <i class="fa-solid fa-bolt"></i> AI 智慧解析
-                        </button>
+                        <p class="text-xs text-slate-500">請手動填寫以下記錄表，並配置 RFID 標籤。RFID 編號長度必須為 24 碼。</p>
                     </div>
                 </div>
 
                 <!-- Manual Form -->
-                <form id="specimenForm" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 opacity-50 hover:opacity-100 transition-opacity duration-300" id="formArea">
+                <form id="specimenForm" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" id="formArea">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1.5">取樣日期與時間</label>
                         <input type="datetime-local" id="castDate" required onchange="calculateTestDates()"
@@ -328,35 +289,47 @@
                         </label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <input type="checkbox" id="hasSpecimen1" checked onchange="toggleSpecimen(1)" class="w-3.5 h-3.5 text-amber-500 border-slate-300 rounded focus:ring-amber-500 cursor-pointer">
-                                    <label for="hasSpecimen1" class="text-[11px] text-slate-600 cursor-pointer select-none">試體 #1 RFID 晶片碼</label>
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2">
+                                        <input type="checkbox" id="hasSpecimen1" checked onchange="toggleSpecimen(1)" class="w-3.5 h-3.5 text-amber-500 border-slate-300 rounded focus:ring-amber-500 cursor-pointer">
+                                        <label for="hasSpecimen1" class="text-[11px] text-slate-600 cursor-pointer select-none">試體 #1 RFID 晶片碼</label>
+                                    </div>
+                                    <span id="charCount1" class="text-[10px] font-mono text-rose-500 font-bold hidden">0/24</span>
                                 </div>
-                                <input type="text" id="rfid1" required minlength="24" maxlength="24" placeholder="請輸入24碼RFID..." 
+                                <input type="text" id="rfid1" required minlength="24" maxlength="24" placeholder="請輸入24碼RFID..." oninput="updateCharCount(1)"
                                     class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed">
                             </div>
                             <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <input type="checkbox" id="hasSpecimen2" checked onchange="toggleSpecimen(2)" class="w-3.5 h-3.5 text-amber-500 border-slate-300 rounded focus:ring-amber-500 cursor-pointer">
-                                    <label for="hasSpecimen2" class="text-[11px] text-slate-600 cursor-pointer select-none">試體 #2 RFID 晶片碼</label>
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2">
+                                        <input type="checkbox" id="hasSpecimen2" checked onchange="toggleSpecimen(2)" class="w-3.5 h-3.5 text-amber-500 border-slate-300 rounded focus:ring-amber-500 cursor-pointer">
+                                        <label for="hasSpecimen2" class="text-[11px] text-slate-600 cursor-pointer select-none">試體 #2 RFID 晶片碼</label>
+                                    </div>
+                                    <span id="charCount2" class="text-[10px] font-mono text-rose-500 font-bold hidden">0/24</span>
                                 </div>
-                                <input type="text" id="rfid2" required minlength="24" maxlength="24" placeholder="請輸入24碼RFID..." 
+                                <input type="text" id="rfid2" required minlength="24" maxlength="24" placeholder="請輸入24碼RFID..." oninput="updateCharCount(2)"
                                     class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed">
                             </div>
                             <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <input type="checkbox" id="hasSpecimen3" checked onchange="toggleSpecimen(3)" class="w-3.5 h-3.5 text-amber-500 border-slate-300 rounded focus:ring-amber-500 cursor-pointer">
-                                    <label for="hasSpecimen3" class="text-[11px] text-slate-600 cursor-pointer select-none">試體 #3 RFID 晶片碼</label>
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2">
+                                        <input type="checkbox" id="hasSpecimen3" checked onchange="toggleSpecimen(3)" class="w-3.5 h-3.5 text-amber-500 border-slate-300 rounded focus:ring-amber-500 cursor-pointer">
+                                        <label for="hasSpecimen3" class="text-[11px] text-slate-600 cursor-pointer select-none">試體 #3 RFID 晶片碼</label>
+                                    </div>
+                                    <span id="charCount3" class="text-[10px] font-mono text-rose-500 font-bold hidden">0/24</span>
                                 </div>
-                                <input type="text" id="rfid3" required minlength="24" maxlength="24" placeholder="請輸入24碼RFID..." 
+                                <input type="text" id="rfid3" required minlength="24" maxlength="24" placeholder="請輸入24碼RFID..." oninput="updateCharCount(3)"
                                     class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed">
                             </div>
                             <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <input type="checkbox" id="hasSpecimen4" checked onchange="toggleSpecimen(4)" class="w-3.5 h-3.5 text-amber-500 border-slate-300 rounded focus:ring-amber-500 cursor-pointer">
-                                    <label for="hasSpecimen4" class="text-[11px] text-slate-600 cursor-pointer select-none">試體 #4 RFID 晶片碼</label>
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2">
+                                        <input type="checkbox" id="hasSpecimen4" checked onchange="toggleSpecimen(4)" class="w-3.5 h-3.5 text-amber-500 border-slate-300 rounded focus:ring-amber-500 cursor-pointer">
+                                        <label for="hasSpecimen4" class="text-[11px] text-slate-600 cursor-pointer select-none">試體 #4 RFID 晶片碼</label>
+                                    </div>
+                                    <span id="charCount4" class="text-[10px] font-mono text-rose-500 font-bold hidden">0/24</span>
                                 </div>
-                                <input type="text" id="rfid4" required minlength="24" maxlength="24" placeholder="請輸入24碼RFID..." 
+                                <input type="text" id="rfid4" required minlength="24" maxlength="24" placeholder="請輸入24碼RFID..." oninput="updateCharCount(4)"
                                     class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed">
                             </div>
                         </div>
@@ -366,6 +339,7 @@
                         <div class="text-xs text-blue-900">
                             <span class="font-bold block mb-0.5"><i class="fa-solid fa-calculator mr-1"></i> 實驗室試壓行程自動試算：</span>
                             7天試壓日：<span id="preview7Day" class="font-bold underline text-blue-950">--</span> | 28天試壓日：<span id="preview28Day" class="font-bold underline text-blue-950">--</span>
+                            <span class="text-[10px] text-blue-700 ml-2">(遇假日自動順延至週一)</span>
                         </div>
                     </div>
 
@@ -467,13 +441,6 @@
                         class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
                     <p class="text-[10px] text-slate-500 mt-1">每次儲存表單時，會自動推播資料至此自動化流程。</p>
                 </div>
-                
-                <div>
-                    <label class="block text-xs font-semibold text-indigo-700 mb-1.5 flex items-center gap-1.5"><i class="fa-solid fa-key"></i> Gemini API Key (AI 助理功能)</label>
-                    <input type="password" id="geminiKeyInput" placeholder="AIzaSy..." 
-                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <p class="text-[10px] text-slate-500 mt-1">請填入 Google AI Studio 申請的 API Key 以啟用表單辨識與聊天助理。目前已內建預設金鑰。</p>
-                </div>
 
                 <div class="pt-5 mt-2 border-t border-slate-100 flex justify-between items-center">
                     <div>
@@ -494,63 +461,11 @@
         </div>
     </div>
 
-    <!-- AI Chatbot Assistant -->
-    <div id="aiChatWidget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-        <!-- Chat Window -->
-        <div id="chatWindow" class="bg-white border border-slate-200 rounded-2xl shadow-2xl w-80 sm:w-96 mb-4 hidden flex-col overflow-hidden transition-all duration-300 origin-bottom-right transform scale-95 opacity-0">
-            <!-- Header -->
-            <div class="bg-indigo-600 text-white px-4 py-3 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                        <i class="fa-solid fa-robot text-sm"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold">實驗室 AI 助理</h4>
-                        <p class="text-[10px] text-indigo-200">隨時為您查詢排程與表單狀態</p>
-                    </div>
-                </div>
-                <button onclick="toggleChat()" class="text-indigo-200 hover:text-white transition">
-                    <i class="fa-solid fa-times"></i>
-                </button>
-            </div>
-            
-            <!-- Messages Area -->
-            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto bg-slate-50 min-h-[300px] max-h-[400px] space-y-4 text-sm">
-                <!-- Welcome Message -->
-                <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-robot text-xs"></i>
-                    </div>
-                    <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-2.5 shadow-sm text-slate-700">
-                        您好！我是實驗室專屬的 AI 助理。我可以幫您統整目前的排程、查詢特定表單的試體狀態，或是計算 RFID 的使用量。請問今天有什麼我可以幫忙的嗎？
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Input Area -->
-            <div class="p-3 bg-white border-t border-slate-200 flex gap-2">
-                <input type="text" id="chatInput" placeholder="詢問排程、表單狀態..." class="flex-1 bg-slate-100 border-none rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" onkeypress="handleChatKeyPress(event)">
-                <button onclick="sendChatMessage()" id="btnSendChat" class="bg-indigo-600 hover:bg-indigo-700 text-white w-10 h-10 rounded-xl flex items-center justify-center transition shadow-sm shrink-0">
-                    <i class="fa-solid fa-paper-plane text-xs"></i>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Toggle Button -->
-        <button onclick="toggleChat()" id="chatToggleBtn" class="w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg shadow-indigo-600/30 flex items-center justify-center text-xl transition-transform hover:scale-105 active:scale-95">
-            <i class="fa-solid fa-sparkles"></i>
-        </button>
-    </div>
-
     <!-- JavaScript Application Logic -->
     <script>
         const STORAGE_KEY = 'concrete_rfid_master_v5';
         let currentWebhookUrl = ""; 
         let currentEditForm = null;
-        let aiBase64Image = null; // Store base64 image for AI extraction
-        
-        // Use a default Gemini Key if none is provided in settings (For demo purposes. In production, users should input their own)
-        const DEFAULT_GEMINI_KEY = "AQ.Ab8RN6K_cPtAmAZQaPxDVMyAKvtCbO-8x-gnXJzqBELRGXeGEQ";
 
         // 預設資料
         const masterSheets = [
@@ -565,10 +480,10 @@
                 test28Day: '2026-08-27',
                 specimen7DayId: null,
                 specimens: [
-                    { id: '1', rfid: 'RE280117020001548ECB20B25' },
-                    { id: '2', rfid: 'RE280117020000568ECB20B25' },
-                    { id: '3', rfid: 'RE280117020000568ECB20B25' },
-                    { id: '4', rfid: 'RE280117020001578ECB20B25' }
+                    { id: '1', rfid: '01548ECB20B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '2', rfid: '00568ECB20B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '3', rfid: '00568ECB20B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '4', rfid: '01578ECB20B25'.padStart(24, 'RE2801170200000000000000') }
                 ]
             },
             {
@@ -582,10 +497,10 @@
                 test28Day: '2026-09-01',
                 specimen7DayId: null,
                 specimens: [
-                    { id: '1', rfid: 'RE280117020000325ECAF0B25' },
-                    { id: '2', rfid: 'RE280117020000315ECAF0B25' },
-                    { id: '3', rfid: 'RE280117020001305ECAF0B25' },
-                    { id: '4', rfid: 'RE2801170200011F5ECAB0B25' }
+                    { id: '1', rfid: '00325ECAF0B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '2', rfid: '00315ECAF0B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '3', rfid: '01305ECAF0B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '4', rfid: '011F5ECAB0B25'.padStart(24, 'RE2801170200000000000000') }
                 ]
             },
             {
@@ -599,10 +514,10 @@
                 test28Day: '2026-09-04',
                 specimen7DayId: null,
                 specimens: [
-                    { id: '1', rfid: 'RE280117020000598ECB20B25' },
-                    { id: '2', rfid: 'RE2801170200015B8ECB20B25' },
-                    { id: '3', rfid: 'RE2801170200005C8ECB20B25' },
-                    { id: '4', rfid: 'RE2801170200005A8ECB20B25' }
+                    { id: '1', rfid: '000598ECB20B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '2', rfid: '015B8ECB20B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '3', rfid: '0005C8ECB20B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '4', rfid: '0005A8ECB20B25'.padStart(24, 'RE2801170200000000000000') }
                 ]
             },
             {
@@ -616,10 +531,10 @@
                 test28Day: '2026-09-10',
                 specimen7DayId: null,
                 specimens: [
-                    { id: '1', rfid: 'RE2801170200015D8ECB20B25' },
-                    { id: '2', rfid: 'RE2801170200015E8ECB20B25' },
-                    { id: '3', rfid: 'RE280117020001108ECB80B25' },
-                    { id: '4', rfid: 'RE280117020000118ECB80B25' }
+                    { id: '1', rfid: '015D8ECB20B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '2', rfid: '015E8ECB20B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '3', rfid: '01108ECB80B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '4', rfid: '0118ECB80B25'.padStart(24, 'RE2801170200000000000000') }
                 ]
             },
             {
@@ -633,10 +548,10 @@
                 test28Day: '2026-09-22',
                 specimen7DayId: null,
                 specimens: [
-                    { id: '1', rfid: 'RE280117020000128ECB80B25' },
-                    { id: '2', rfid: 'RE280117020001138ECB80B25' },
-                    { id: '3', rfid: 'RE280117020001377ECAF0B25' },
-                    { id: '4', rfid: 'RE280117020000148ECB80B25' }
+                    { id: '1', rfid: '00128ECB80B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '2', rfid: '01138ECB80B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '3', rfid: '01377ECAF0B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '4', rfid: '0148ECB80B25'.padStart(24, 'RE2801170200000000000000') }
                 ]
             },
             {
@@ -650,10 +565,10 @@
                 test28Day: '2026-09-24',
                 specimen7DayId: null,
                 specimens: [
-                    { id: '1', rfid: 'RE280117020001327ECAF0B25' },
-                    { id: '2', rfid: 'RE280117020001317ECAF0B25' },
-                    { id: '3', rfid: 'RE280117020000307ECAF0B25' },
-                    { id: '4', rfid: 'RE2801170200001F7ECAB0B25' }
+                    { id: '1', rfid: '01327ECAF0B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '2', rfid: '01317ECAF0B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '3', rfid: '00307ECAF0B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '4', rfid: '001F7ECAB0B25'.padStart(24, 'RE2801170200000000000000') }
                 ]
             },
             {
@@ -667,9 +582,9 @@
                 test28Day: '2026-09-29',
                 specimen7DayId: null,
                 specimens: [
-                    { id: '1', rfid: 'RE2801170200011E7ECAB0B25' },
-                    { id: '2', rfid: 'RE2801170200011D7ECAB0B25' },
-                    { id: '3', rfid: 'RE2801170200001C7ECAB0B25' }
+                    { id: '1', rfid: '00011E7ECAB0B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '2', rfid: '00011D7ECAB0B25'.padStart(24, 'RE2801170200000000000000') },
+                    { id: '3', rfid: '00001C7ECAB0B25'.padStart(24, 'RE2801170200000000000000') }
                 ]
             }
         ];
@@ -689,10 +604,6 @@
                 sheets = masterSheets;
                 saveData();
             }
-        }
-
-        function getGeminiKey() {
-            return localStorage.getItem('gemini_api_key') || DEFAULT_GEMINI_KEY;
         }
 
         function saveData() {
@@ -721,10 +632,6 @@
             if (savedWebhook) currentWebhookUrl = savedWebhook;
             const webhookElem = document.getElementById('webhookInput');
             if(webhookElem) webhookElem.value = currentWebhookUrl;
-
-            const savedGeminiKey = localStorage.getItem('gemini_api_key');
-            const geminiKeyElem = document.getElementById('geminiKeyInput');
-            if(geminiKeyElem && savedGeminiKey) geminiKeyElem.value = savedGeminiKey;
 
             const castDateElem = document.getElementById('castDate');
             if(castDateElem) {
@@ -1111,9 +1018,12 @@
                 let specimensHtml = '';
                 if(isEditing) {
                     specimensHtml = s.specimens.map(sp => `
-                        <div class="flex items-center gap-2 mb-1">
+                        <div class="flex items-center gap-2 mb-1 relative">
                             <span class="text-xs font-bold text-amber-600 w-8">[#${sp.id}]</span>
-                            <input type="text" id="edit_rfid_${sp.id}" value="${sp.rfid}" class="w-full text-xs font-mono border border-slate-300 rounded px-2 py-1" maxlength="24" minlength="24">
+                            <div class="flex-1 relative flex items-center">
+                                <input type="text" id="edit_rfid_${sp.id}" value="${sp.rfid}" oninput="updateInlineCharCount('${sp.id}')" class="w-full text-xs font-mono border border-slate-300 rounded px-2 py-1.5 pr-12 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors" maxlength="24">
+                                <span id="edit_charCount_${sp.id}" class="absolute right-2 text-[10px] font-mono font-bold pointer-events-none ${sp.rfid.length === 24 ? 'text-emerald-500' : 'text-rose-500'}">${sp.rfid.length}/24</span>
+                            </div>
                         </div>
                     `).join('');
                 } else {
@@ -1146,9 +1056,15 @@
                                 <option value="350" ${s.strength==='350'?'selected':''}>350 kgf/cm²</option>
                             </select>
                         </td>
-                        <td class="p-3.5 align-top"><input type="text" id="edit_supplier" value="${s.supplier}" class="w-full text-xs border border-slate-300 rounded px-2 py-1"></td>
-                        <td class="p-3.5 text-xs text-slate-400 align-top">系統自動重算</td>
-                        <td class="p-3.5 text-xs text-slate-400 align-top">系統自動重算</td>
+                        <td class="p-3.5 align-top">
+                            <select id="edit_supplier" class="w-full text-xs border border-slate-300 rounded px-2 py-1">
+                                <option value="宥辰興業股份有限公司-八德廠" ${s.supplier==='宥辰興業股份有限公司-八德廠'?'selected':''}>宥辰興業股份有限公司-八德廠</option>
+                                <option value="亞東預拌混凝土股份有限公司-汐止廠" ${s.supplier==='亞東預拌混凝土股份有限公司-汐止廠'?'selected':''}>亞東預拌混凝土股份有限公司-汐止廠</option>
+                                <option value="和昌國際工業股份有限公司" ${s.supplier==='和昌國際工業股份有限公司'?'selected':''}>和昌國際工業股份有限公司</option>
+                            </select>
+                        </td>
+                        <td class="p-3.5 text-[11px] text-slate-400 align-top">自動順延至週一</td>
+                        <td class="p-3.5 text-[11px] text-slate-400 align-top">自動順延至週一</td>
                         <td class="p-3.5 text-right whitespace-nowrap align-top">
                             <button onclick="saveInlineEdit('${s.formNumber}')" class="p-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg transition text-xs border border-emerald-300 mr-1" title="儲存修改">
                                 <i class="fa-solid fa-check"></i>
@@ -1193,11 +1109,49 @@
         function startInlineEdit(formNumber) {
             currentEditForm = formNumber;
             renderTable();
+            // 延遲更新字數顯示
+            setTimeout(() => {
+                const sheet = sheets.find(s => s.formNumber === formNumber);
+                if(sheet) {
+                    sheet.specimens.forEach(sp => {
+                        updateInlineCharCount(sp.id);
+                    });
+                }
+            }, 50);
         }
 
         function cancelInlineEdit() {
             currentEditForm = null;
             renderTable();
+        }
+        
+        function updateInlineCharCount(specId) {
+            const input = document.getElementById(`edit_rfid_${specId}`);
+            const countSpan = document.getElementById(`edit_charCount_${specId}`);
+            if(input && countSpan) {
+                const len = input.value.trim().length;
+                countSpan.innerText = `${len}/24`;
+                if(len !== 24) {
+                    countSpan.className = "absolute right-2 text-[10px] font-mono text-rose-500 font-bold pointer-events-none";
+                    input.classList.add('border-rose-400', 'focus:ring-rose-500');
+                    input.classList.remove('border-slate-300', 'focus:ring-amber-500', 'border-emerald-300', 'focus:ring-emerald-500');
+                } else {
+                    countSpan.className = "absolute right-2 text-[10px] font-mono text-emerald-500 font-bold pointer-events-none";
+                    input.classList.remove('border-rose-400', 'focus:ring-rose-500');
+                    input.classList.add('border-emerald-300', 'focus:ring-emerald-500');
+                }
+            }
+        }
+
+        // 新增的調整試壓日函數 (遇到週末順延至週一)
+        function adjustToWorkday(dateObj) {
+            const dayOfWeek = dateObj.getDay();
+            if (dayOfWeek === 6) { // Saturday -> Monday
+                dateObj.setDate(dateObj.getDate() + 2);
+            } else if (dayOfWeek === 0) { // Sunday -> Monday
+                dateObj.setDate(dateObj.getDate() + 1);
+            }
+            return dateObj;
         }
 
         function saveInlineEdit(oldFormNumber) {
@@ -1228,14 +1182,18 @@
             });
 
             if (rfidError) {
-                showModal('長度錯誤', '所有的 RFID 晶片碼都必須剛好是 24 碼字元！', 'warning');
+                showModal('長度錯誤', '所有的 RFID 晶片碼都必須剛好是 24 碼字元！\n(請注意紅色字數提示)', 'warning');
                 return;
             }
 
-            // Recalculate Dates
+            // Recalculate Dates & Adjust for Weekends automatically
             const castDateObj = new Date(newCastDateRaw);
-            const d7 = new Date(castDateObj); d7.setDate(castDateObj.getDate() + 7);
-            const d28 = new Date(castDateObj); d28.setDate(castDateObj.getDate() + 28);
+            let d7 = new Date(castDateObj); d7.setDate(castDateObj.getDate() + 7);
+            d7 = adjustToWorkday(d7);
+            
+            let d28 = new Date(castDateObj); d28.setDate(castDateObj.getDate() + 28);
+            d28 = adjustToWorkday(d28);
+            
             const pad = n => String(n).padStart(2, '0');
             const castDateFormatted = `${castDateObj.getFullYear()}-${pad(castDateObj.getMonth()+1)}-${pad(castDateObj.getDate())} ${pad(castDateObj.getHours())}:${pad(castDateObj.getMinutes())}`;
 
@@ -1252,7 +1210,31 @@
             saveData();
             currentEditForm = null;
             refreshAllViews();
-            showModal('修改成功', `表單記錄已成功更新！`, 'success');
+            showModal('修改成功', `表單記錄已成功更新！\n試壓日已自動避開假日順延。`, 'success');
+        }
+
+        function updateCharCount(index) {
+            const input = document.getElementById(`rfid${index}`);
+            const countSpan = document.getElementById(`charCount${index}`);
+            if(input && countSpan) {
+                const len = input.value.trim().length;
+                countSpan.innerText = `${len}/24`;
+                countSpan.classList.remove('hidden');
+                
+                if (len !== 24 && len > 0) {
+                    countSpan.className = "text-[10px] font-mono text-rose-500 font-bold";
+                    input.classList.add('border-rose-300', 'focus:ring-rose-500');
+                    input.classList.remove('border-slate-200', 'focus:ring-amber-500');
+                } else if (len === 24) {
+                    countSpan.className = "text-[10px] font-mono text-emerald-500 font-bold";
+                    input.classList.remove('border-rose-300', 'focus:ring-rose-500');
+                    input.classList.add('border-emerald-300', 'focus:ring-emerald-500');
+                } else {
+                    countSpan.classList.add('hidden');
+                    input.classList.remove('border-rose-300', 'focus:ring-rose-500', 'border-emerald-300', 'focus:ring-emerald-500');
+                    input.classList.add('border-slate-200', 'focus:ring-amber-500');
+                }
+            }
         }
 
         function calculateTestDates() {
@@ -1261,12 +1243,15 @@
 
             const castDate = new Date(castDateVal);
             
-            const d7 = new Date(castDate);
+            // 自動計算並跳過假日
+            let d7 = new Date(castDate);
             d7.setDate(castDate.getDate() + 7);
+            d7 = adjustToWorkday(d7);
             const str7 = d7.toISOString().split('T')[0];
 
-            const d28 = new Date(castDate);
+            let d28 = new Date(castDate);
             d28.setDate(castDate.getDate() + 28);
+            d28 = adjustToWorkday(d28);
             const str28 = d28.toISOString().split('T')[0];
 
             const p7 = document.getElementById('preview7Day');
@@ -1284,16 +1269,21 @@
         function toggleSpecimen(index) {
             const checkbox = document.getElementById(`hasSpecimen${index}`);
             const input = document.getElementById(`rfid${index}`);
+            const countSpan = document.getElementById(`charCount${index}`);
             if (checkbox && input) {
                 if (checkbox.checked) {
                     input.disabled = false;
                     input.required = true;
                     input.placeholder = "請輸入24碼RFID...";
+                    if(input.value) updateCharCount(index);
                 } else {
                     input.disabled = true;
                     input.required = false;
                     input.value = "";
                     input.placeholder = "無試體";
+                    input.classList.remove('border-rose-300', 'focus:ring-rose-500', 'border-emerald-300', 'focus:ring-emerald-500');
+                    input.classList.add('border-slate-200', 'focus:ring-amber-500');
+                    if(countSpan) countSpan.classList.add('hidden');
                 }
             }
         }
@@ -1315,7 +1305,7 @@
                     const val = rfidInput.value.trim();
                     // 強制檢查 24 碼防呆
                     if (val.length !== 24) {
-                        showModal('長度錯誤', `試體 #${i} 的 RFID 長度必須為 24 碼（目前 ${val.length} 碼）。`, 'warning');
+                        showModal('長度錯誤', `試體 #${i} 的 RFID 長度必須為 24 碼（目前 ${val.length} 碼）。\n請檢查紅色字數提示。`, 'warning');
                         return;
                     }
                     newSpecimens.push({ id: String(i), rfid: val });
@@ -1328,8 +1318,11 @@
             }
 
             const castDateObj = new Date(castDateRaw);
-            const d7 = new Date(castDateObj); d7.setDate(castDateObj.getDate() + 7);
-            const d28 = new Date(castDateObj); d28.setDate(castDateObj.getDate() + 28);
+            let d7 = new Date(castDateObj); d7.setDate(castDateObj.getDate() + 7);
+            d7 = adjustToWorkday(d7);
+            
+            let d28 = new Date(castDateObj); d28.setDate(castDateObj.getDate() + 28);
+            d28 = adjustToWorkday(d28);
 
             const pad = n => String(n).padStart(2, '0');
             const castDateFormatted = `${castDateObj.getFullYear()}-${pad(castDateObj.getMonth()+1)}-${pad(castDateObj.getDate())} ${pad(castDateObj.getHours())}:${pad(castDateObj.getMinutes())}`;
@@ -1356,26 +1349,30 @@
             saveData();
             refreshAllViews();
 
-            // Webhook 同步傳送資料 (可將 Make.com 設定為與 Notion 綁定)
-            if (currentWebhookUrl && currentWebhookUrl.startsWith("http")) {
-                fetch(currentWebhookUrl, {
-                    method: 'POST',
-                    mode: 'no-cors', 
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify(newSheet)
-                }).then(res => console.log('資料已成功推播至 Make Webhook (no-cors)'))
-                  .catch(err => console.error("Make Webhook 傳送失敗:", err));
-            }
+            // Webhook 同步傳送資料 (No-CORS 模式，避免瀏覽器阻擋)
+            const webhookUrl = "https://hook.eu1.make.com/s8xfpuham4pgw6boorsijykpd1hp9hs0";
+            fetch(webhookUrl, {
+                method: 'POST',
+                mode: 'no-cors', 
+                headers: { 'Content-Type': 'text/plain' }, // Use text/plain for no-cors
+                body: JSON.stringify(newSheet)
+            }).then(res => console.log('資料已成功推播至 Make Webhook (no-cors)'))
+              .catch(err => console.error("Make Webhook 傳送失敗:", err));
+            
 
-            showModal('新增成功', `表單 ${formNumber} 與 ${newSpecimens.length} 顆 RFID 晶片已成功建檔！`, 'success');
+            showModal('新增成功', `表單 ${formNumber} 與 ${newSpecimens.length} 顆 RFID 晶片已成功建檔！\n(試壓日已自動避開假日順延)`, 'success');
             document.getElementById('specimenForm').reset();
             
             for (let i = 1; i <= 4; i++) {
                 const input = document.getElementById(`rfid${i}`);
+                const countSpan = document.getElementById(`charCount${i}`);
                 if(input) {
                     input.disabled = false;
                     input.placeholder = "請輸入24碼RFID...";
+                    input.classList.remove('border-rose-300', 'focus:ring-rose-500', 'border-emerald-300', 'focus:ring-emerald-500');
+                    input.classList.add('border-slate-200', 'focus:ring-amber-500');
                 }
+                if(countSpan) countSpan.classList.add('hidden');
             }
             
             switchTab('rfidFocus');
@@ -1480,368 +1477,12 @@
             textArea.select();
             try {
                 document.execCommand('copy');
-                showModal('複製成功', `已經為您依照指定版面將 RFID 資料複製到剪貼簿。\n\n預覽：\n${text}`, 'success');
+                // 移除了原本的 showModal('複製成功', ...); 讓複製過程在背景完成，不打擾使用者
             } catch (err) {
+                // 如果複製失敗，還是保留一個警告提示，讓使用者知道出了問題
                 showModal('複製失敗', '無法自動複製，請手動複製。', 'warning');
             }
             document.body.removeChild(textArea);
-        }
-
-        function handleAiImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64DataUrl = e.target.result;
-                aiBase64Image = base64DataUrl.split(',')[1]; // Extract pure base64
-
-                // Update UI
-                document.getElementById('aiImagePlaceholder').classList.add('hidden');
-                const previewContainer = document.getElementById('aiImagePreviewContainer');
-                previewContainer.classList.remove('hidden');
-                document.getElementById('aiPreviewImg').src = base64DataUrl;
-                
-                // Dim manual form to suggest AI is ready
-                document.getElementById('specimenForm').classList.remove('opacity-100');
-                document.getElementById('specimenForm').classList.add('opacity-50');
-                
-                document.getElementById('aiExtractionStatus').innerHTML = `<span class="text-indigo-600"><i class="fa-solid fa-check-circle"></i> 圖片已就緒，點擊右方按鈕開始解析</span>`;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        async function triggerAiExtraction() {
-            const textInput = document.getElementById('aiTextInput').value.trim();
-            const statusEl = document.getElementById('aiExtractionStatus');
-            const btnEl = document.getElementById('btnExtract');
-            
-            if (!aiBase64Image && !textInput) {
-                showModal('提示', '請先上傳表單照片，或是貼上文字訊息，才能進行 AI 智慧解析喔！', 'warning');
-                return;
-            }
-
-            const apiKey = getGeminiKey();
-            if (!apiKey) {
-                showModal('設定缺失', '請先在「系統環境設定」中填寫您的 Gemini API Key。', 'warning');
-                return;
-            }
-
-            // Update UI State
-            btnEl.disabled = true;
-            btnEl.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> 解析中...`;
-            statusEl.innerHTML = `<span class="text-indigo-600 animate-pulse"><i class="fa-solid fa-wand-magic-sparkles"></i> 正在召喚 Gemini AI 解讀資料...</span>`;
-            document.getElementById('specimenForm').classList.add('opacity-50');
-
-            try {
-                // Determine model based on input type. If image is present, we must use a vision capable model.
-                // gemini-3-flash-preview supports both multimodal and text
-                const model = "gemini-1.5-flash"; 
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-                let parts = [];
-                
-                // The prompt asks for JSON output specifically matching our form fields
-                let promptText = `請分析提供的混凝土取樣資料（文字描述或圖片表單），並提取以下資訊。
-                    請務必只回傳純 JSON 格式的字串，不要包含任何 markdown 語法 (如 \`\`\`json)，也不要包含額外的說明文字。
-                    如果某個欄位找不到資訊，請將其設為空字串 ""。
-                    
-                    需要的 JSON 結構：
-                    {
-                        "formNumber": "表單編號，例如 1150825-210-01",
-                        "castDate": "取樣日期時間，轉換為 YYYY-MM-DDTHH:mm 格式。若無時間，預設 08:00",
-                        "projectName": "工程名稱",
-                        "supplier": "供應廠商名稱 (請盡量對應: 宥辰興業股份有限公司-八德廠, 亞東預拌混凝土股份有限公司-汐止廠, 和昌國際工業股份有限公司)",
-                        "memo": "結構部位或取樣備註",
-                        "strength": "設計強度數字，例如 210, 280, 300, 350",
-                        "rfid1": "第 1 顆試體的 24 碼 RFID 晶片碼 (若有)",
-                        "rfid2": "第 2 顆試體的 24 碼 RFID 晶片碼 (若有)",
-                        "rfid3": "第 3 顆試體的 24 碼 RFID 晶片碼 (若有)",
-                        "rfid4": "第 4 顆試體的 24 碼 RFID 晶片碼 (若有)"
-                    }
-                `;
-
-                if (textInput) {
-                    promptText += `\n\n使用者提供的文字描述：\n${textInput}`;
-                }
-
-                parts.push({ text: promptText });
-
-                if (aiBase64Image) {
-                    parts.push({
-                        inlineData: {
-                            mimeType: "image/jpeg", // Assuming jpeg, Gemini usually handles png/jpg fine
-                            data: aiBase64Image
-                        }
-                    });
-                }
-
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ role: "user", parts: parts }],
-                        generationConfig: {
-                            temperature: 0.2, // Low temp for extraction tasks
-                        }
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.error) {
-                    throw new Error(data.error.message || "API 發生錯誤");
-                }
-
-                let responseText = data.candidates[0].content.parts[0].text;
-                
-                // Clean up the response to ensure it's valid JSON
-                responseText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-                
-                let parsedData;
-                try {
-                    parsedData = JSON.parse(responseText);
-                } catch (e) {
-                    console.error("JSON Parsing failed. Raw response:", responseText);
-                    throw new Error("AI 回傳的格式不正確，無法解析為表單資料。");
-                }
-
-                // Populate the form
-                if(parsedData.formNumber) document.getElementById('formNumber').value = parsedData.formNumber;
-                if(parsedData.castDate) document.getElementById('castDate').value = parsedData.castDate;
-                if(parsedData.projectName) document.getElementById('projectName').value = parsedData.projectName;
-                
-                // Handle Supplier dropdown matching
-                if(parsedData.supplier) {
-                    const supplierSelect = document.getElementById('supplier');
-                    let found = false;
-                    for (let i = 0; i < supplierSelect.options.length; i++) {
-                        if (supplierSelect.options[i].value.includes(parsedData.supplier) || parsedData.supplier.includes(supplierSelect.options[i].value)) {
-                            supplierSelect.selectedIndex = i;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) console.warn("Supplier from AI didn't strictly match dropdown options:", parsedData.supplier);
-                }
-                
-                if(parsedData.memo) document.getElementById('memo').value = parsedData.memo;
-                
-                // Handle Strength matching
-                if(parsedData.strength) {
-                    const strengthSelect = document.getElementById('strength');
-                    let sStr = String(parsedData.strength).replace(/[^0-9]/g, ''); // extract numbers
-                    for (let i = 0; i < strengthSelect.options.length; i++) {
-                        if (strengthSelect.options[i].value === sStr) {
-                            strengthSelect.selectedIndex = i;
-                            break;
-                        }
-                    }
-                }
-
-                // Populate RFIDs
-                for (let i = 1; i <= 4; i++) {
-                    const rfidVal = parsedData[`rfid${i}`];
-                    const cb = document.getElementById(`hasSpecimen${i}`);
-                    const input = document.getElementById(`rfid${i}`);
-                    
-                    if (rfidVal && rfidVal.length >= 10) { // basic sanity check
-                        cb.checked = true;
-                        toggleSpecimen(i);
-                        // Try to pad or truncate to 24 if necessary, though AI should ideally provide 24
-                        let cleanRfid = rfidVal.replace(/[^A-Za-z0-9]/g, '');
-                        if(cleanRfid.length > 24) cleanRfid = cleanRfid.substring(0, 24);
-                        if(cleanRfid.length < 24) cleanRfid = cleanRfid.padEnd(24, '0');
-                        input.value = cleanRfid;
-                    } else {
-                        cb.checked = false;
-                        toggleSpecimen(i);
-                    }
-                }
-
-                calculateTestDates();
-                
-                // Highlight form to show it's populated
-                document.getElementById('specimenForm').classList.remove('opacity-50');
-                document.getElementById('specimenForm').classList.add('opacity-100');
-                document.getElementById('specimenForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check"></i> 解析成功！已為您填入表單，請確認無誤後儲存。</span>`;
-                
-                // Clear inputs for next time
-                aiBase64Image = null;
-                document.getElementById('aiImageInput').value = "";
-                document.getElementById('aiTextInput').value = "";
-                
-            } catch (error) {
-                console.error("AI Extraction Error:", error);
-                statusEl.innerHTML = `<span class="text-rose-600"><i class="fa-solid fa-triangle-exclamation"></i> 解析失敗：${error.message}</span>`;
-                document.getElementById('specimenForm').classList.remove('opacity-50');
-                document.getElementById('specimenForm').classList.add('opacity-100');
-            } finally {
-                btnEl.disabled = false;
-                btnEl.innerHTML = `<i class="fa-solid fa-bolt"></i> AI 智慧解析`;
-                
-                // Reset Image Preview UI slightly delayed
-                setTimeout(() => {
-                    if(statusEl.innerText.includes("成功")) {
-                        document.getElementById('aiImagePreviewContainer').classList.add('hidden');
-                        document.getElementById('aiImagePlaceholder').classList.remove('hidden');
-                        document.getElementById('aiPreviewImg').src = "";
-                        statusEl.innerHTML = "";
-                    }
-                }, 5000);
-            }
-        }
-
-        function toggleChat() {
-            const chatWindow = document.getElementById('chatWindow');
-            const toggleBtn = document.getElementById('chatToggleBtn');
-            
-            if (chatWindow.classList.contains('hidden')) {
-                chatWindow.classList.remove('hidden');
-                // Small delay to allow display block to apply before transition
-                setTimeout(() => {
-                    chatWindow.classList.remove('scale-95', 'opacity-0');
-                    chatWindow.classList.add('scale-100', 'opacity-100');
-                }, 10);
-                toggleBtn.innerHTML = '<i class="fa-solid fa-times"></i>';
-                toggleBtn.classList.replace('bg-indigo-600', 'bg-slate-600');
-                toggleBtn.classList.replace('hover:bg-indigo-700', 'hover:bg-slate-700');
-                document.getElementById('chatInput').focus();
-            } else {
-                chatWindow.classList.remove('scale-100', 'opacity-100');
-                chatWindow.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                    chatWindow.classList.add('hidden');
-                }, 300); // Wait for transition
-                toggleBtn.innerHTML = '<i class="fa-solid fa-sparkles"></i>';
-                toggleBtn.classList.replace('bg-slate-600', 'bg-indigo-600');
-                toggleBtn.classList.replace('hover:bg-slate-700', 'hover:bg-indigo-700');
-            }
-        }
-
-        function handleChatKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendChatMessage();
-            }
-        }
-
-        function appendMessage(role, text) {
-            const messagesContainer = document.getElementById('chatMessages');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'flex gap-3 ' + (role === 'user' ? 'flex-row-reverse' : '');
-            
-            let avatarHtml = '';
-            let contentStyle = '';
-            
-            if (role === 'user') {
-                avatarHtml = `
-                    <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-user text-xs"></i>
-                    </div>`;
-                contentStyle = `bg-slate-800 text-white border border-slate-700 rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-sm text-sm whitespace-pre-wrap`;
-                msgDiv.innerHTML = `${avatarHtml}<div class="${contentStyle}">${text}</div>`;
-            } else {
-                avatarHtml = `
-                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-robot text-xs"></i>
-                    </div>`;
-                contentStyle = `bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-2.5 shadow-sm text-slate-700 text-sm overflow-hidden`;
-                
-                // Parse markdown if marked.js is available
-                let parsedText = text;
-                if (typeof marked !== 'undefined') {
-                    parsedText = marked.parse(text);
-                }
-                
-                msgDiv.innerHTML = `${avatarHtml}<div class="${contentStyle} prose prose-sm prose-indigo max-w-none prose-p:my-1 prose-ul:my-1">${parsedText}</div>`;
-            }
-            
-            messagesContainer.appendChild(msgDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        async function sendChatMessage() {
-            const inputEl = document.getElementById('chatInput');
-            const btnEl = document.getElementById('btnSendChat');
-            const message = inputEl.value.trim();
-            
-            if (!message) return;
-            
-            const apiKey = getGeminiKey();
-            if (!apiKey) {
-                appendMessage('system', '請先在系統設定中填入 Gemini API Key 才能使用助理服務喔！');
-                return;
-            }
-
-            // User Message
-            appendMessage('user', message);
-            inputEl.value = '';
-            inputEl.disabled = true;
-            btnEl.disabled = true;
-            btnEl.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i>';
-
-            try {
-                // Prepare context: Send a summary of the current state of sheets
-                const today = getTodayString();
-                const simplifiedData = sheets.map(s => ({
-                    form: s.formNumber,
-                    date: s.castDate.split(' ')[0],
-                    supplier: s.supplier,
-                    specsCount: s.specimens ? s.specimens.length : 0,
-                    test7D: s.test7Day,
-                    test28D: s.test28Day
-                }));
-                
-                const systemPrompt = `你是一個專業的工程材料實驗室 AI 助理。
-                    今天的日期是 ${today}。
-                    
-                    以下是目前系統中載入的所有混凝土試體表單資料的摘要（JSON格式）：
-                    ${JSON.stringify(simplifiedData)}
-                    
-                    請根據這些資料回答使用者的問題。
-                    回答請簡潔專業，使用繁體中文，可以使用 Markdown 格式（如條列式）讓排版更清楚。
-                    如果問到統計數據，請根據提供的 JSON 幫忙計算。例如：計算未來的試壓排程、清點特定供應商的表單數量等。
-                    不要捏造資料中沒有的表單編號。`;
-
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-                
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        systemInstruction: {
-                            parts: [{ text: systemPrompt }]
-                        },
-                        contents: [{
-                            role: "user",
-                            parts: [{ text: message }]
-                        }],
-                        generationConfig: {
-                            temperature: 0.4,
-                        }
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error.message);
-                }
-                
-                const reply = data.candidates[0].content.parts[0].text;
-                appendMessage('assistant', reply);
-
-            } catch (error) {
-                console.error("Chat Error:", error);
-                appendMessage('assistant', `抱歉，我在處理您的請求時遇到問題：${error.message}`);
-            } finally {
-                inputEl.disabled = false;
-                btnEl.disabled = false;
-                btnEl.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i>';
-                inputEl.focus();
-            }
         }
 
         function exportToCSV() {
@@ -1887,12 +1528,6 @@
                 currentWebhookUrl = webhookElem.value.trim();
                 localStorage.setItem('make_webhook_url', currentWebhookUrl);
             }
-            
-            const geminiKeyElem = document.getElementById('geminiKeyInput');
-            if (geminiKeyElem) {
-                localStorage.setItem('gemini_api_key', geminiKeyElem.value.trim());
-            }
-
             closeSettings();
             showModal('設定已儲存', '您的設定已成功更新並儲存於瀏覽器。', 'success');
         }

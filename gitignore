@@ -1,0 +1,92 @@
+# =====================================================================
+#  機密檔案保護清單 —— 以下檔案「絕對不要」上傳到 GitHub
+#  本專案是公開 repo，任何人都看得到所有檔案與歷史紀錄。
+#
+#  本專案的金鑰應該放在：
+#    - Gemini API Key、Notion 同步網址/密碼 → 網頁右上角齒輪「系統設定」（存在瀏覽器）
+#    - Notion 金鑰、資料庫 ID、SYNC_SECRET → Google Apps Script「指令碼屬性」
+#  絕對不要把金鑰直接寫進 index.html、notion-sync.gs 或 README.md。
+# =====================================================================
+
+# ---- 環境變數檔 ----
+.env
+.env.*
+*.env
+!.env.example
+!.env.sample
+.envrc
+
+# ---- 金鑰、憑證、私鑰 ----
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+*.ppk
+
+# ---- 雲端服務憑證（Google / Notion / Make 等） ----
+credentials*.json
+client_secret*.json
+service-account*.json
+service_account*.json
+*-service-account.json
+token.json
+tokens.json
+.clasprc.json
+.clasp.json
+gcloud/
+.gcloud/
+
+# ---- 各種名稱帶有機密字眼的檔案 ----
+*secret*
+*secrets*
+*password*
+*passwords*
+*apikey*
+*api_key*
+*api-key*
+*credential*
+*token*.txt
+*金鑰*
+*密碼*
+*機密*
+!notion-sync.gs
+
+# ---- 本機設定檔 ----
+config.local.*
+*.local.json
+*.local.js
+local-config.*
+settings.local.*
+
+# ---- 資料匯出與備份（可能含真實工程資料） ----
+*.csv
+*.xlsx
+*.xls
+*.sqlite
+*.db
+backup/
+backups/
+*.bak
+*.backup
+
+# ---- 系統與編輯器暫存檔 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+node_modules/
+
+# ---- 瀏覽器下載時自動改名的重複檔（例如 index (5).html） ----
+* (*).html
+* (*).gs
